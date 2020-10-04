@@ -26,14 +26,16 @@
         <b-icon icon="question-square" class="mr-2" />Modal
       </b-button>      
     </p>
-    <div id="hint-area" class="mt-3 ml-3  w-75">
-      <b-badge pill variant="secondary" v-for="(hint, i) in hints" :key="'hint-list-' + i" class="mr-1">
-        <font size="+0">
-          <b-icon icon="question" v-for="n of hint.text.length" :key="n">
-          </b-icon>
-        </font>
-      </b-badge>
-    </div>
+    <b-card id="hint-area" class="mt-3 ml-3 w-75 bg-warning">
+      <div>
+        <b-badge pill variant="secondary" v-for="(hint, i) in hints" :key="'hint-list-' + i" class="mr-1">
+          <font size="+0">
+            <b-icon icon="question" v-for="n of hint.text.length" :key="n">
+            </b-icon>
+          </font>
+        </b-badge>
+      </div>
+    </b-card>
     <b-modal id="modal-nice" title="Nice!" header-bg-variant="success" ok-only>
       <p><font size="+1">Hello from modal!</font></p>
       <p><font size="+0">Hello from modal!</font></p>
@@ -137,5 +139,8 @@ export default {
 .collapsed > .when-open,
 .not-collapsed > .when-closed {
   display: none;
+}
+#hint-area.bg-warning {
+  background-color: #ffffe0 !important;
 }
 </style>
