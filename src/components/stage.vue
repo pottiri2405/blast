@@ -5,7 +5,7 @@
         <span>Progress: <strong>{{ progress.toFixed(2) }} / {{ progressMax }}</strong></span>
       </b-progress-bar>
     </b-progress>
-    <b-alert
+    <!-- <b-alert
       :show="dismissCountDown"
       dismissible
       variant="success"
@@ -14,7 +14,7 @@
       class="mt-3"
     >
       <p>Answer</p>
-    </b-alert>
+    </b-alert> -->
     <b-container class="mt-3">
       <b-row v-for="(cols, y) in rows" :key="'row-' + y">
         <b-link href="#foo" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" @click="choice(x, y)">
@@ -24,7 +24,7 @@
         </b-link>
       </b-row>
     </b-container>
-    <b-button size="md" variant="danger" v-b-toggle:stage-answer class="mt-3">
+    <b-button size="md" variant="danger" v-b-toggle:stage-words class="mt-3">
       <span class="when-open">
           <small><b-icon icon="arrows-collapse" />Close Answer</small>
       </span>
@@ -32,8 +32,12 @@
           <small><b-icon icon="arrows-expand" />Open Answer</small>
       </span>
     </b-button>
-    <b-collapse id="stage-answer">
-      12345
+    <b-collapse id="stage-words" class="mt-3">
+      <ul id="word-list">
+        <li v-for="(word, i) in words" :key="'word-list' + i">
+          {{ word.text }}
+        </li>
+      </ul>
     </b-collapse>
   </div>
 </template>
@@ -60,9 +64,18 @@ export default {
         [1, 2, 3, 4, 5, 6, 7, 8, 9, '１']
       ],
       words: [
-        {word: 123, text: 12345},
-        {word: 123, text: 12345},
-        {word: 123, text: 12345}
+        {text: 123, comment: 12345},
+        {text: 456, comment: 12345},
+        {text: 789, comment: 12345},
+        {text: 123, comment: 12345},
+        {text: 456, comment: 12345},
+        {text: 789, comment: 12345},
+        {text: 123, comment: 12345},
+        {text: 456, comment: 12345},
+        {text: 789, comment: 12345},
+        {text: 123, comment: 12345},
+        {text: 456, comment: 12345},
+        {text: 789, comment: 12345}                        
       ]
     }
   },
