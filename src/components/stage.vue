@@ -81,12 +81,12 @@ export default {
 </script>
 <style>
 .box {
-  width: 2rem;
-  height: 2rem;
-  text-align: center;
-  vertical-align: middle;
-  border-top: 1px solid #000000;
-  border-left: 1px solid #000000;
+  width: 2rem !important;
+  height: 2rem !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  border-top: 1px solid #000000 !important;
+  border-left: 1px solid #000000 !important;
   padding-left: 0px !important;
   padding-right: 0px !important;
   background-color: #fffaf0;
