@@ -29,10 +29,8 @@
     <b-card id="hint-area" class="mt-3 ml-3 w-75 bg-warning">
       <div>
         <b-badge pill variant="secondary" v-for="(hint, i) in hints" :key="'hint-list-' + i" class="mr-1">
-          <font size="+0">
-            <b-icon icon="question" v-for="n of hint.text.length" :key="n">
-            </b-icon>
-          </font>
+          <b-icon icon="question" v-for="n of hint.text.length" :key="n">
+          </b-icon>
         </b-badge>
       </div>
     </b-card>
