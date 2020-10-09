@@ -76,7 +76,7 @@ export default {
   height: 100%;
 }
 .bg-green {
-  background-color: #009688;
+  background-color: #009688 !important;
   color: #ffffff;
 }
 </style>
