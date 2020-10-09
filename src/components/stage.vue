@@ -6,8 +6,8 @@
         </b-col>
       </b-row>
       <b-row v-for="(cols, y) in rows" :key="'row-' + y">
-        <b-link href="#foo" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" @click="choice(x, y)">
-          <b-col border class="box" v-bind:class="{'box-row-last': isLast(y, rows.length - 1), 'box-col-last': isLast(x, cols.length - 1)}" bg-variant="info">
+        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" @click="clickChar(x, y)">
+          <b-col border class="box" v-bind:class="{'box-row-last': isLast(y, rows.length - 1), 'box-col-last': isLast(x, cols.length - 1), 'bg-danger': (isClicked(x, y))}">
             {{col}}
           </b-col>
         </b-link>
@@ -17,14 +17,14 @@
       <b-progress-bar :value="progress">
         <span>Progress: <strong>{{ progress.toFixed(2) }} / {{ progressMax }}</strong></span>
       </b-progress-bar>
-    </b-progress>    
+    </b-progress>
     <p class="text-left mt-3 ml-3">
       <b-button size="sm" variant="danger">
         <b-icon icon="question-square" class="mr-2" />Open hint
       </b-button>
       <b-button size="sm" v-b-modal.modal-nice variant="secondary">
         <b-icon icon="question-square" class="mr-2" />Modal
-      </b-button>      
+      </b-button>
     </p>
     <b-card id="hint-area" class="mt-3 ml-3 w-75 bg-warning">
       <div>
@@ -37,7 +37,7 @@
     <b-modal id="modal-nice" title="Nice!" header-bg-variant="success" ok-only>
       <p><font size="+1">Hello from modal!</font></p>
       <p><font size="+0">Hello from modal!</font></p>
-    </b-modal>    
+    </b-modal>
   </div>
 </template>
 
@@ -95,9 +95,10 @@ export default {
         {text: '456', comment: 12345},
         {text: 'あいうえお', comment: 12345},
         {text: '123', comment: 12345},
-        {text: '456', comment: 12345},                
-        {text: '789', comment: 12345}                        
-      ]
+        {text: '456', comment: 12345},
+        {text: '789', comment: 12345}
+      ],
+      clicked: {}
     }
   },
   methods: {
@@ -109,6 +110,18 @@ export default {
     },
     countDownChanged (dismissCountDown) {
       this.dismissCountDown = dismissCountDown
+    },
+    clickChar (x, y) {
+      let key = x + '-' + y
+      if (this.clicked[key]) {
+        delete this.clicked[key]
+        return true
+      }
+      this.clicked[key] = {x: x, y: y, char: this.rows[y][x]}
+    },
+    isClicked (x, y) {
+      let key = x + '-' + y
+      return (this.clicked[key])
     }
   }
 }
