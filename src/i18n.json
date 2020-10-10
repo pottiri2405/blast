@@ -1,0 +1,25 @@
+{
+  "ja": {
+    "message": {
+      "title": "ワード・サーチ・パズル",
+      "start": "スタート！",
+      "hint": "ヒント",
+      "restart": "最初からやり直し",
+      "thumbnail_size": "サイズ：",
+      "thumbnail_word_count": "ワード数：",
+      "google_search": "Google 画像検索"
+
+    }
+  },
+  "en": {
+    "message": {
+      "title": "Word search puzzle",
+      "start": "Start",
+      "hint": "Hint",
+      "restart": "Restart",
+      "thumbnail_size": "size:",
+      "thumbnail_word_count": "Word count:",
+      "google_search": "Google image search"
+    }
+  }
+}

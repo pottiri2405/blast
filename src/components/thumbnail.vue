@@ -11,12 +11,26 @@
       footer-border-variant="dark"
     >
       <template v-slot:header>
-        <h6 class="mb-0 text-center align-middle">ワード・サーチ・パズル</h6>
+        <h5 class="mb-0 text-center align-middle">{{ $t("message.title") }}</h5>
       </template>
       <b-card-body class="text-center align-middle">
-        <h3>{{ data.title }}</h3>
-        <h5>{{ data.size }} ✕ {{ data.size }} マス</h5>
-        <h5>{{ Object.keys(data.words).length }} ワード</h5>
+        <b-container>
+          <b-row>
+            <b-col class="text-center align-middle">
+              <h3>{{ data.title }}</h3>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col class="text-center align-middle">
+              <h5>{{ $t("message.thumbnail_size") }}{{ data.size }} ✕ {{ data.size }}</h5>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col class="text-center align-middle">
+              <h5>{{ $t("message.thumbnail_word_count") }}{{ Object.keys(data.words).length }}</h5>
+            </b-col>
+          </b-row>
+        </b-container>
       </b-card-body>
       <template v-slot:footer>
         <p class="text-center align-middle">
@@ -36,12 +50,12 @@
 export default {
   data () {
     return {
-      data: null
+      data: {title: '', size: 0, words: {}, tags: {}}
     }
   },
   methods: {
     generate () {
-      html2canvas(document.querySelector('#preview')).then(function (canvas) {
+      html2canvas(document.querySelector('#preview')).then(function (canvas) { // eslint-disable-line
         let result = document.querySelector('#result')
         result.innerHTML = ''
         result.appendChild(canvas)
