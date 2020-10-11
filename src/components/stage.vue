@@ -1,11 +1,12 @@
 <template>
   <div id="stage">
-    <b-container>
+    <b-spinner v-show="init===true" id="init-loading" label="Large Spinner"></b-spinner>
+    <b-container v-show="init===false">
       <b-row class="mt-3">
         <b-col class="pl-0">
-          <b-progress v-if="progressMax > 0" :max="progressMax" height="2rem" class="w-100">
-            <b-progress-bar :value="progress">
-              {{ progress }} / {{ Object.keys(data.words).length }}
+          <b-progress v-if="progress.max > 0" :max="progress.max" height="2rem" class="w-100">
+            <b-progress-bar :value="progress.count">
+              {{ progress.count }} / {{ progress.max }}
             </b-progress-bar>
           </b-progress>
         </b-col>
@@ -15,7 +16,7 @@
           {{ timerTime }}
         </b-col>
         <b-col>
-          <b-button pill size="sm" v-b-modal.modal-nice variant="primary">
+          <b-button pill size="sm" variant="warning">
             {{ $t("message.restart") }}
           </b-button>
         </b-col>
@@ -26,19 +27,23 @@
             <b-form-checkbox v-model="hint" name="check-hint" switch>
               {{ $t("message.hint") }}
             </b-form-checkbox>
+            <br>
+            <b-button pill size="sm" variant="info" @click="clickedClear()">
+              {{ $t("message.checked_clear") }}
+            </b-button>
           </p>
         </b-col>
         <b-col id="hint-image-area">
-          <b-container>
+          <b-container class="pl-0">
             <b-row>
-              <b-col id="hint-google-search">
+              <b-col id="hint-google-search" class="pl-0">
                 {{ $t("message.google_search") }}
               </b-col>
             </b-row>
             <b-row>
               <b-col id="hint-image1" class="pl-0"><span>No image</span></b-col>
-              <b-col id="hint-image2"><span>No image</span></b-col>
-              <b-col id="hint-image3"><span>No image</span></b-col>
+              <b-col id="hint-image2" class="pl-0"><span>No image</span></b-col>
+              <b-col id="hint-image3" class="pl-0"><span>No image</span></b-col>
             </b-row>
           </b-container>
         </b-col>
@@ -48,6 +53,7 @@
           <b-col border class="box" v-bind:class="{
             'box-row-last': isLast(y, Object.keys(data.map).length),
             'box-col-last': isLast(x, Object.keys(cols).length),
+            'answerd-box': isAnsweredBox(x, y),
             'clicked-box': isClickedBox(x, y)
             }">
             {{col}}
@@ -90,58 +96,65 @@
 export default {
   data () {
     return {
+      init: true,
       timerTime: '00:00:00.000',
       timerTimeBegan: null,
       timerTimeStopped: null,
       timerStoppedDuration: 0,
       timerStarted: null,
       timerRunning: false,
-      progress: 0,
-      progressMax: 100,
-      dismissSecs: 3,
-      dismissCountDown: 3,
       hint: false,
       data: {map: {}, words: {}},
-      clicked: [],
-      clickedAxis: ''
+      progress: {count: 0, max: 100},
+      clicked: {keys: [], axis: ''},
+      answered: {keys: [], words: []}
     }
   },
   methods: {
     isLast (idx, length) {
       return (idx >= length)
     },
-    countDownChanged (dismissCountDown) {
-      this.dismissCountDown = dismissCountDown
+    clickedClear () {
+      this.clicked.keys.length = 0
     },
     clickBox (x, y) {
       let key = this.getKey(x, y)
-      if (this.clicked.indexOf(key) !== -1) {
-        if (this.clicked.slice(-1)[0] === key) {
-          this.clicked.pop()
+      if (this.clicked.keys.indexOf(key) !== -1) {
+        if (this.clicked.keys.slice(-1)[0] === key) {
+          this.clicked.keys.pop()
         }
-        if (this.clicked.length <= 1) {
-          this.clickedAxis = ''
+        if (this.clicked.keys.length <= 1) {
+          this.clicked.axis = ''
         }
-        let answer = this.createAnser()
         return
       }
-      if (this.clicked.length <= 0 || this.getNearClickedBox(x, y, this.clickedAxis).length > 0) {
-        if (this.clicked.length === 1) {
-          this.clickedAxis = this.getClickedAxis(x, y)
+      if (this.clicked.keys.length <= 0 || this.getNearClickedKeysBox(x, y, this.clicked.axis).length > 0) {
+        if (this.clicked.keys.length === 1) {
+          this.clicked.axis = this.getClickedAxis(x, y)
         }
-        this.clicked.push(key)
+        this.clicked.keys.push(key)
       }
-      let answer = this.createAnser()
+      let word = this.combineClickedKeysChars()
+      if (this.data.words[word] && this.answered.words.includes(word) === false) {
+        this.answered.words.push(word)
+        this.answered.keys = this.answered.keys.concat(this.clicked.keys)
+        this.clicked.keys.length = 0
+        this.progress.count++
+        this.$refs['modal-correct'].show()
+      }
     },
-    isClickedBox (x, y, axis) {
-      return (this.clicked.indexOf(this.getKey(x, y)) !== -1)
+    isClickedBox (x, y) {
+      return (this.clicked.keys.includes(this.getKey(x, y)))
     },
-    getNearClickedBox (x, y, axis) {
+    isAnsweredBox (x, y) {
+      return (this.answered.keys.includes(this.getKey(x, y)))
+    },
+    getNearClickedKeysBox (x, y, axis) {
       let rtn = []
-      if (this.clicked.length <= 0) {
+      if (this.clicked.keys.length <= 0) {
         return rtn
       }
-      let last = this.clicked.slice(-1)[0]
+      let last = this.clicked.keys.slice(-1)[0]
       const ix = parseInt(x)
       const iy = parseInt(y)
       if ((axis === '' || axis === 'w') && this.getKey(ix + 1, iy) === last) {
@@ -164,7 +177,7 @@ export default {
       return rtn
     },
     getClickedAxis (x, y) {
-      let last = this.clicked.slice(-1)[0]
+      let last = this.clicked.keys.slice(-1)[0]
       const ix = parseInt(x)
       const iy = parseInt(y)
       if (this.getKey(ix + 1, iy) === last) {
@@ -186,13 +199,12 @@ export default {
       }
       return ''
     },
-    createAnser () {
+    combineClickedKeysChars () {
       let answer = ''
-      this.clicked.forEach((elem, index) => {
-        let xy = elem.split('-')
-        answer += this.data.map[xy[0]][xy[1]]
+      this.clicked.keys.forEach((e, i) => {
+        let xy = e.split('-')
+        answer += this.data.map[xy[1]][xy[0]]
       })
-      this.logging(answer)
       return answer
     },
     gameStart () {
@@ -248,6 +260,8 @@ export default {
       .then(response => {
         $vm.logging(response)
         $vm.data = response.data
+        $vm.progress.max = Object.keys($vm.data.words).length
+        $vm.init = false
         $vm.$refs['modal-start'].show()
       })
       .catch(err => {
@@ -259,6 +273,14 @@ export default {
 }
 </script>
 <style>
+#init-loading {
+  font-size: xx-large;
+  position: fixed;
+  height: 50px;
+  width: 50px;
+  top:calc(50% - 50px/2);
+  left:calc(50% - 50px/2);
+}
 .box {
   width: 2rem !important;
   height: 2rem !important;
@@ -277,6 +299,11 @@ export default {
 }
 .box-col-last {
   border-right: 1px solid #000000;
+}
+.answerd-box {
+  background-color: #28a745;
+  /* -webkit-animation: flash 1s ease infinite;
+  animation: flash 1s ease infinite; */
 }
 .clicked-box {
   background-color: #f08080;
@@ -311,6 +338,7 @@ export default {
 #hint-image1,
 #hint-image2,
 #hint-image3 {
+  font-size: -1;
   max-width: 4rem !important;
   width: 4rem !important;
   height: 4rem !important;
@@ -325,6 +353,11 @@ export default {
 }
 #hint-image3 {
   border-right: 1px solid #000000;
+}
+#hint-image1 span,
+#hint-image2 span,
+#hint-image3 span {
+  font-size: small;
 }
 #hint-google-search {
   text-align: center !important;

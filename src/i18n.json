@@ -7,8 +7,8 @@
       "restart": "最初からやり直し",
       "thumbnail_size": "サイズ：",
       "thumbnail_word_count": "ワード数：",
-      "google_search": "Google 画像検索"
-
+      "google_search": "Google 画像検索",
+      "checked_clear": "選択クリア"
     }
   },
   "en": {
@@ -19,7 +19,8 @@
       "restart": "Restart",
       "thumbnail_size": "size:",
       "thumbnail_word_count": "Word count:",
-      "google_search": "Google image search"
+      "google_search": "Google image search",
+      "checked_clear": "Clear"
     }
   }
 }
