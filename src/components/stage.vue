@@ -159,8 +159,10 @@ export default {
         this.$refs['modal-correct'].show()
         await this.sleep(1000)
         this.$refs['modal-correct'].hide()
-        this.timerStop()
-        this.$refs['modal-complete'].show()
+        if (this.progress.count >= this.progress.max) {
+          this.timerStop()
+          this.$refs['modal-complete'].show()
+        }
       }
     },
     isClickedBox (x, y) {
@@ -301,7 +303,7 @@ export default {
   position: fixed;
   height: 50px;
   width: 50px;
-  top:100px;
+  top: 50px;
   left:calc(50% - 50px/2);
 }
 .box {
