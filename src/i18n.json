@@ -9,8 +9,8 @@
       "thumbnail_word_count": "ワード数：",
       "google_search": "Google 画像検索",
       "checked_clear": "選択クリア",
-      "complete_message": "全問正解！"
-
+      "complete_message": "全問正解！",
+      "time": "タイム："
     }
   },
   "en": {
@@ -23,7 +23,8 @@
       "thumbnail_word_count": "Word count:",
       "google_search": "Google image search",
       "checked_clear": "Clear",
-      "complete_message": "Complete"
+      "complete_message": "Complete",
+      "time": "Time:"
     }
   }
 }

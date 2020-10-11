@@ -13,10 +13,10 @@
       </b-row>
       <b-row class="mt-2">
         <b-col id="timer" class="bg-dark text-light text-center align-middle">
-          {{ timerTime }}
+          {{ timer.time }}
         </b-col>
         <b-col>
-          <b-button pill size="sm" variant="warning">
+          <b-button pill size="sm" variant="warning" @click="restart()">
             {{ $t("message.restart") }}
           </b-button>
         </b-col>
@@ -80,12 +80,30 @@
         </b-row>
       </b-container>
     </b-modal>
-    <b-modal ref="modal-correct" size="md" hide-header hide-footer>
+    <b-modal ref="modal-correct" size="md" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
             <h3>{{ correct.word }}</h3>
             <p>{{ correct.text }}</p>
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-modal>
+    <b-modal ref="modal-complete" size="md" hide-header hide-footer>
+      <b-container>
+        <b-row>
+          <b-col class="text-center align-middle">
+            <h3>{{ $t("message.complete_message") }}</h3>
+            <p>
+              {{ $t("message.time") }}
+              <span id="timer" class="bg-dark text-light text-center align-middle p-2">
+                {{ timer.time }}
+              </span>
+            </p>
+            <b-button pill size="sm" variant="warning" @click="restart()">
+              {{ $t("message.restart") }}
+            </b-button>
           </b-col>
         </b-row>
       </b-container>
@@ -98,12 +116,7 @@ export default {
   data () {
     return {
       init: true,
-      timerTime: '00:00:00.000',
-      timerTimeBegan: null,
-      timerTimeStopped: null,
-      timerStoppedDuration: 0,
-      timerStarted: null,
-      timerRunning: false,
+      timer: {time: '00:00:00.000', began: null, stopped: null, duration: 0, started: null, running: false},
       hint: false,
       data: {map: {}, words: {}},
       progress: {count: 0, max: 100},
@@ -144,8 +157,10 @@ export default {
         this.progress.count++
         this.correct.word = word
         this.$refs['modal-correct'].show()
-        await this.sleep(750)
+        await this.sleep(1000)
         this.$refs['modal-correct'].hide()
+        this.timerStop()
+        this.$refs['modal-complete'].show()
       }
     },
     isClickedBox (x, y) {
@@ -217,42 +232,45 @@ export default {
       this.timerStart()
     },
     timerStart () {
-      if (this.timerRunning !== false) return
-      if (this.timerTimeBegan === null) {
+      if (this.timer.running !== false) return
+      if (this.timer.began === null) {
         this.timerReset()
-        this.timerTimeBegan = new Date()
+        this.timer.began = new Date()
       }
-      if (this.timerTimeStopped !== null) {
-        this.timerStoppedDuration += (new Date() - this.timerTimeStopped)
+      if (this.timer.stopped !== null) {
+        this.timer.duration += (new Date() - this.timer.stopped)
       }
-      this.timerStarted = setInterval(this.timerClockRunning, 10)
-      this.timerRunning = true
+      this.timer.started = setInterval(this.timerClockRunning, 10)
+      this.timer.running = true
     },
     timerStop () {
-      this.timerRunning = false
-      this.timerTimeStopped = new Date()
-      clearInterval(this.timerStarted)
+      this.timer.running = false
+      this.timer.stopped = new Date()
+      clearInterval(this.timer.started)
     },
     timerReset () {
       this.timerStart = false
-      clearInterval(this.timerStarted)
-      this.timerStoppedDuration = 0
-      this.timerTimeBegan = null
-      this.timerTimeStopped = null
-      this.timerTime = '00:00:00.000'
+      clearInterval(this.timer.started)
+      this.timer.duration = 0
+      this.timer.began = null
+      this.timer.stopped = null
+      this.timer.time = '00:00:00.000'
     },
     timerClockRunning () {
       let currentTime = new Date()
-      let timeElapsed = new Date(currentTime - this.timerTimeBegan - this.timerStoppedDuration)
+      let timeElapsed = new Date(currentTime - this.timer.began - this.timer.duration)
       let hour = timeElapsed.getUTCHours()
       let min = timeElapsed.getUTCMinutes()
       let sec = timeElapsed.getUTCSeconds()
       let ms = timeElapsed.getUTCMilliseconds()
-      this.timerTime =
+      this.timer.time =
         this.zeroPrefix(hour, 2) + ':' +
         this.zeroPrefix(min, 2) + ':' +
         this.zeroPrefix(sec, 2) + '.' +
         this.zeroPrefix(ms, 3)
+    },
+    restart () {
+      this.$router.go({path: this.$router.currentRoute.path, force: true})
     }
   },
   mounted () {
@@ -266,6 +284,7 @@ export default {
         $vm.logging(response)
         $vm.data = response.data
         $vm.progress.max = Object.keys($vm.data.words).length
+        //$vm.progress.max = 1
         $vm.init = false
         $vm.$refs['modal-start'].show()
       })
