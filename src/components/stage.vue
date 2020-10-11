@@ -131,6 +131,7 @@ export default {
     },
     clickedClear () {
       this.clicked.keys.length = 0
+      this.clicked.axis = ''
     },
     async clickBox (x, y) {
       let key = this.getKey(x, y)
@@ -153,7 +154,7 @@ export default {
       if (this.data.words[word] && this.answered.words.includes(word) === false) {
         this.answered.words.push(word)
         this.answered.keys = this.answered.keys.concat(this.clicked.keys)
-        this.clicked.keys.length = 0
+        this.clickedClear()
         this.progress.count++
         this.correct.word = word
         this.$refs['modal-correct'].show()
