@@ -10,7 +10,7 @@
           </b-progress>
         </b-col>
       </b-row>
-      <b-row class="mt-3">
+      <b-row class="mt-2">
         <b-col id="timer" class="bg-dark text-light text-center align-middle">
           {{ timerTime }}
         </b-col>
@@ -20,10 +20,10 @@
           </b-button>
         </b-col>
       </b-row>
-      <b-row id="hint-area" class="mt-3">
+      <b-row id="hint-area" class="mt-2 mb-2">
         <b-col id="hint-check-area" class="pl-0">
           <p class="text-left">
-            <b-form-checkbox v-model="hit" name="check-hint" switch>
+            <b-form-checkbox v-model="hint" name="check-hint" switch>
               {{ $t("message.hint") }}
             </b-form-checkbox>
           </p>
@@ -31,14 +31,14 @@
         <b-col id="hint-image-area">
           <b-container>
             <b-row>
-              <b-col id="hint-image1" class="pl-0"><span>No image</span></b-col>
-              <b-col id="hint-image2"><span>No image</span></b-col>
-              <b-col id="hint-image3"><span>No image</span></b-col>
-            </b-row>
-            <b-row>
               <b-col id="hint-google-search">
                 {{ $t("message.google_search") }}
               </b-col>
+            </b-row>
+            <b-row>
+              <b-col id="hint-image1" class="pl-0"><span>No image</span></b-col>
+              <b-col id="hint-image2"><span>No image</span></b-col>
+              <b-col id="hint-image3"><span>No image</span></b-col>
             </b-row>
           </b-container>
         </b-col>
@@ -74,6 +74,15 @@
         </b-row>
       </b-container>
     </b-modal>
+    <b-modal ref="modal-correct" size="md" hide-header hide-footer>
+      <b-container>
+        <b-row>
+          <b-col class="text-center align-middle">
+            正解!
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-modal>
   </div>
 </template>
 
@@ -91,9 +100,10 @@ export default {
       progressMax: 100,
       dismissSecs: 3,
       dismissCountDown: 3,
-      hit: false,
+      hint: false,
       data: {map: {}, words: {}},
-      clicked: {}
+      clicked: [],
+      clickedAxis: ''
     }
   },
   methods: {
@@ -105,15 +115,85 @@ export default {
     },
     clickBox (x, y) {
       let key = this.getKey(x, y)
-      if (this.clicked[key]) {
-        delete this.clicked[key]
-        return true
+      if (this.clicked.indexOf(key) !== -1) {
+        if (this.clicked.slice(-1)[0] === key) {
+          this.clicked.pop()
+        }
+        if (this.clicked.length <= 1) {
+          this.clickedAxis = ''
+        }
+        let answer = this.createAnser()
+        return
       }
-      this.clicked[key] = 1
+      if (this.clicked.length <= 0 || this.getNearClickedBox(x, y, this.clickedAxis).length > 0) {
+        if (this.clicked.length === 1) {
+          this.clickedAxis = this.getClickedAxis(x, y)
+        }
+        this.clicked.push(key)
+      }
+      let answer = this.createAnser()
     },
-    isClickedBox (x, y) {
-      let key = this.getKey(x, y)
-      return (this.clicked[key])
+    isClickedBox (x, y, axis) {
+      return (this.clicked.indexOf(this.getKey(x, y)) !== -1)
+    },
+    getNearClickedBox (x, y, axis) {
+      let rtn = []
+      if (this.clicked.length <= 0) {
+        return rtn
+      }
+      let last = this.clicked.slice(-1)[0]
+      const ix = parseInt(x)
+      const iy = parseInt(y)
+      if ((axis === '' || axis === 'w') && this.getKey(ix + 1, iy) === last) {
+        rtn.push(last)
+      } else if ((axis === '' || axis === 'sw') && this.getKey(ix + 1, iy - 1) === last) {
+        rtn.push(last)
+      } else if ((axis === '' || axis === 's') && this.getKey(ix, iy - 1) === last) {
+        rtn.push(last)
+      } else if ((axis === '' || axis === 'se') && this.getKey(ix - 1, iy - 1) === last) {
+        rtn.push(last)
+      } else if ((axis === '' || axis === 'e') && this.getKey(ix - 1, iy) === last) {
+        rtn.push(last)
+      } else if ((axis === '' || axis === 'ne') && this.getKey(ix - 1, iy + 1) === last) {
+        rtn.push(last)
+      } else if ((axis === '' || axis === 'n') && this.getKey(ix, iy + 1) === last) {
+        rtn.push(last)
+      } else if ((axis === '' || axis === 'nw') && this.getKey(ix + 1, iy + 1) === last) {
+        rtn.push(last)
+      }
+      return rtn
+    },
+    getClickedAxis (x, y) {
+      let last = this.clicked.slice(-1)[0]
+      const ix = parseInt(x)
+      const iy = parseInt(y)
+      if (this.getKey(ix + 1, iy) === last) {
+        return 'w'
+      } else if (this.getKey(ix + 1, iy - 1) === last) {
+        return 'sw'
+      } else if (this.getKey(ix, iy - 1) === last) {
+        return 's'
+      } else if (this.getKey(ix - 1, iy - 1) === last) {
+        return 'se'
+      } else if (this.getKey(ix - 1, iy) === last) {
+        return 'e'
+      } else if (this.getKey(ix - 1, iy + 1) === last) {
+        return 'ne'
+      } else if (this.getKey(ix, iy + 1) === last) {
+        return 'n'
+      } else if (this.getKey(ix + 1, iy + 1) === last) {
+        return 'nw'
+      }
+      return ''
+    },
+    createAnser () {
+      let answer = ''
+      this.clicked.forEach((elem, index) => {
+        let xy = elem.split('-')
+        answer += this.data.map[xy[0]][xy[1]]
+      })
+      this.logging(answer)
+      return answer
     },
     gameStart () {
       this.$refs['modal-start'].hide()
@@ -200,8 +280,8 @@ export default {
 }
 .clicked-box {
   background-color: #f08080;
-  -webkit-animation: flash 1s ease infinite;
-  animation: flash 1s ease infinite;
+  /* -webkit-animation: flash 1s ease infinite;
+  animation: flash 1s ease infinite; */
 }
 @-webkit-keyframes flash {
   0% {opacity: 0;}
