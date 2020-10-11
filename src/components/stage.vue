@@ -80,7 +80,7 @@
         </b-row>
       </b-container>
     </b-modal>
-    <b-modal ref="modal-correct" size="md" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
+    <b-modal ref="modal-correct" size="md" hide-header hide-footer no-close-on-esc no-close-on-backdrop clas="middle">
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
@@ -90,7 +90,7 @@
         </b-row>
       </b-container>
     </b-modal>
-    <b-modal ref="modal-complete" size="md" hide-header hide-footer>
+    <b-modal ref="modal-complete" size="md" hide-header hide-footer clas="middle">
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
@@ -390,6 +390,6 @@ export default {
   font-size: 0.8rem;
 }
 .modal {
-  top: 25%;
+  top: 25% !important;
 }
 </style>
