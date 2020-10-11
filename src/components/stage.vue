@@ -389,4 +389,7 @@ export default {
   text-align: center !important;
   font-size: 0.8rem;
 }
+.modal {
+  top: 25%;
+}
 </style>
