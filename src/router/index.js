@@ -13,12 +13,12 @@ Vue.use(BootstrapVueIcons) // added
 export default new Router({
   routes: [
     {
-      path: '/stage/:id',
+      path: '/stage/:id/:language',
       name: 'stage',
       component: stage
     },
     {
-      path: '/thumbnail/:id',
+      path: '/thumbnail/:id/:language',
       name: 'thumbnail',
       component: thumbnail
     }
