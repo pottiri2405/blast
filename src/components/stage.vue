@@ -284,7 +284,6 @@ export default {
         $vm.logging(response)
         $vm.data = response.data
         $vm.progress.max = Object.keys($vm.data.words).length
-        //$vm.progress.max = 1
         $vm.init = false
         $vm.$refs['modal-start'].show()
       })
@@ -302,7 +301,7 @@ export default {
   position: fixed;
   height: 50px;
   width: 50px;
-  top:calc(50% - 50px/2);
+  top:100px;
   left:calc(50% - 50px/2);
 }
 .box {
