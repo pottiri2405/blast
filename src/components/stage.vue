@@ -84,7 +84,8 @@
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
-            正解!
+            <h3>{{ correct.word }}</h3>
+            <p>{{ correct.text }}</p>
           </b-col>
         </b-row>
       </b-container>
@@ -107,7 +108,8 @@ export default {
       data: {map: {}, words: {}},
       progress: {count: 0, max: 100},
       clicked: {keys: [], axis: ''},
-      answered: {keys: [], words: []}
+      answered: {keys: [], words: []},
+      correct: {word: '', text: ''}
     }
   },
   methods: {
@@ -117,7 +119,7 @@ export default {
     clickedClear () {
       this.clicked.keys.length = 0
     },
-    clickBox (x, y) {
+    async clickBox (x, y) {
       let key = this.getKey(x, y)
       if (this.clicked.keys.indexOf(key) !== -1) {
         if (this.clicked.keys.slice(-1)[0] === key) {
@@ -140,7 +142,10 @@ export default {
         this.answered.keys = this.answered.keys.concat(this.clicked.keys)
         this.clicked.keys.length = 0
         this.progress.count++
+        this.correct.word = word
         this.$refs['modal-correct'].show()
+        await this.sleep(750)
+        this.$refs['modal-correct'].hide()
       }
     },
     isClickedBox (x, y) {

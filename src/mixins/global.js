@@ -20,6 +20,11 @@ export default {
       }
       return (zero + num).slice(-digit)
     },
+    sleep (ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+      })
+    },
     getKey (x, y) {
       return x + '-' + y
     }
