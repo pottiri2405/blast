@@ -4,13 +4,14 @@
       "title": "ワード・サーチ・パズル",
       "start": "スタート！",
       "hint": "ヒント",
-      "restart": "最初からやり直し",
+      "restart": "リスタート",
       "thumbnail_size": "サイズ：",
       "thumbnail_word_count": "ワード数：",
       "google_search": "Google 画像検索",
       "checked_clear": "選択クリア",
       "complete_message": "全問正解！",
-      "time": "タイム："
+      "time": "タイム：",
+      "thank_you": "プレイしていただきありがとうございました！"
     }
   },
   "en": {
@@ -24,7 +25,8 @@
       "google_search": "Google image search",
       "checked_clear": "Clear",
       "complete_message": "Complete",
-      "time": "Time:"
+      "time": "Time:",
+      "thank_you": "Thank you for playing!"
     }
   }
 }

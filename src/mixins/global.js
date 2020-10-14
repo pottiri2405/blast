@@ -27,6 +27,18 @@ export default {
     },
     getKey (x, y) {
       return x + '-' + y
+    },
+    getRandomInt (max) {
+      return Math.floor(Math.random() * Math.floor(max))
+    },
+    getRandomFromHash (hash) {
+      let keys = Object.keys(hash)
+      let idx = this.getRandomInt(keys.length - 1)
+      this.logging(keys[idx])
+      let rtn = hash[keys[idx]]
+      this.logging(rtn)
+      return rtn
     }
+
   }
 }

@@ -4,7 +4,7 @@
     <b-container v-show="init===false">
       <b-row class="mt-3">
         <b-col class="pl-0">
-          <b-progress v-if="progress.max > 0" :max="progress.max" height="2rem" class="w-100">
+          <b-progress v-if="progress.max > 0" :max="progress.max" height="2rem" id="progress-bar">
             <b-progress-bar :value="progress.count">
               {{ progress.count }} / {{ progress.max }}
             </b-progress-bar>
@@ -12,40 +12,45 @@
         </b-col>
       </b-row>
       <b-row class="mt-2">
-        <b-col id="timer" class="bg-dark text-light text-center align-middle">
-          {{ timer.time }}
-        </b-col>
         <b-col>
+          <b-button pill size="sm" variant="info" @click="clickedClear()">
+            {{ $t("message.checked_clear") }}
+          </b-button>
           <b-button pill size="sm" variant="warning" @click="restart()">
             {{ $t("message.restart") }}
           </b-button>
         </b-col>
       </b-row>
-      <b-row id="hint-area" class="mt-2 mb-2">
-        <b-col id="hint-check-area" class="pl-0">
-          <p class="text-left">
-            <b-form-checkbox v-model="hint" name="check-hint" switch>
-              {{ $t("message.hint") }}
-            </b-form-checkbox>
-            <br>
-            <b-button pill size="sm" variant="info" @click="clickedClear()">
-              {{ $t("message.checked_clear") }}
-            </b-button>
-          </p>
+      <b-row class="mt-2">
+        <b-col class="ml-0 pl-0">
+          <b-card no-body id="card-hint">
+            <template v-slot:header>
+              <b-form-checkbox v-model="useHint" name="check-hint" switch>
+                {{ $t("message.hint") }}
+              </b-form-checkbox>
+            </template>
+            <b-card-body>
+              <b-container>
+                <b-row v-show="useHint===false">
+                  <b-col id="hint-image1" class="pl-0 no-image"><span>No image</span></b-col>
+                  <b-col id="hint-image2" class="pl-0 no-image"><span>No image</span></b-col>
+                  <b-col id="hint-image3" class="pl-0 no-image"><span>No image</span></b-col>
+                </b-row>
+                <b-row v-show="useHint===true">
+                  <b-col v-for="(image, index) in hint.images" v-bind:key="'hint-image' + (index + 1)" :id="'hint-image' + (index + 1)" class="pl-0" v-bind:class="{'no-image': (image.link.length <= 0)}">
+                    <span v-show="image.link.length <= 0">No image</span>
+                    <span v-show="image.link.length > 0">
+                      <a :href="image.url"><img :src="image.link"></a>
+                    </span>
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-card-body>
+          </b-card>
         </b-col>
-        <b-col id="hint-image-area">
-          <b-container class="pl-0">
-            <b-row>
-              <b-col id="hint-google-search" class="pl-0">
-                {{ $t("message.google_search") }}
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col id="hint-image1" class="pl-0"><span>No image</span></b-col>
-              <b-col id="hint-image2" class="pl-0"><span>No image</span></b-col>
-              <b-col id="hint-image3" class="pl-0"><span>No image</span></b-col>
-            </b-row>
-          </b-container>
+      </b-row>
+      <b-row class="mb-2">
+        <b-col>
         </b-col>
       </b-row>
       <b-row v-for="(cols, y) in data.map" :key="'row-' + y">
@@ -56,9 +61,14 @@
             'answerd-box': isAnsweredBox(x, y),
             'clicked-box': isClickedBox(x, y)
             }">
-            {{col}}
+            {{ col }}
           </b-col>
         </b-link>
+      </b-row>
+      <b-row class="mt-2">
+        <b-col id="timer" class="bg-dark text-light text-center align-middle">
+          {{ timer.time }}
+        </b-col>
       </b-row>
     </b-container>
     <b-modal ref="modal-start" size="md" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
@@ -101,6 +111,7 @@
                 {{ timer.time }}
               </span>
             </p>
+            <p>{{ $t("message.thank_you") }}</p>
             <b-button pill size="sm" variant="warning" @click="restart()">
               {{ $t("message.restart") }}
             </b-button>
@@ -117,12 +128,13 @@ export default {
     return {
       init: true,
       timer: {time: '00:00:00.000', began: null, stopped: null, duration: 0, started: null, running: false},
-      hint: false,
+      useHint: false,
       data: {map: {}, words: {}},
       progress: {count: 0, max: 100},
       clicked: {keys: [], axis: ''},
       answered: {keys: [], words: []},
-      correct: {word: '', text: ''}
+      correct: {word: '', text: ''},
+      hint: {x: 0, y: 0, axis: '', word: '', text: '', images: [], tags: []}
     }
   },
   methods: {
@@ -157,6 +169,7 @@ export default {
         this.clickedClear()
         this.progress.count++
         this.correct.word = word
+        delete this.data.words[word]
         this.$refs['modal-correct'].show()
         await this.sleep(1000)
         this.$refs['modal-correct'].hide()
@@ -232,6 +245,7 @@ export default {
     },
     gameStart () {
       this.$refs['modal-start'].hide()
+      this.hint = this.getRandomFromHash(this.data.words)
       this.timerStart()
     },
     timerStart () {
@@ -307,6 +321,25 @@ export default {
   top: 50px;
   left:calc(50% - 50px/2);
 }
+#progress-bar,
+#card-hint {
+  max-width: 20rem;
+  width: 20rem;
+}
+#card-hint .card-header {
+  padding: 0.25rem 1.25rem !important;
+  text-align: center;
+}
+#card-hint .card-body {
+  padding: 0.25rem !important;
+}
+#card-hint img {
+  width: 100%;
+  height: 100%;
+}
+.no-image {
+  padding-top: 1.25rem !important;
+}
 .box {
   width: 2rem !important;
   height: 2rem !important;
@@ -347,24 +380,17 @@ export default {
 
 #timer {
   font-family: 'Share Tech Mono', sans-serif;
-  max-width: 8rem !important;
-  width: 8rem !important;
+  font-size: x-large;
+  max-width: 12rem !important;
+  width: 12rem !important;
   padding: 0px;
   padding-top: 0.25rem;
-  border-radius: 50rem;
-}
-#hint-check-area {
-  max-width: 8rem !important;
-  width: 8rem !important;
-}
-#hint-image-area {
-  max-width: 15rem !important;
-  width: 15rem !important;
+  /* border-radius: 50rem; */
 }
 #hint-image1,
 #hint-image2,
 #hint-image3 {
-  font-size: -1;
+  font-size: x-small;
   max-width: 4rem !important;
   width: 4rem !important;
   height: 4rem !important;
@@ -375,7 +401,6 @@ export default {
   font-size: 0.8rem;
   text-align: center !important;
   padding: 0px;
-  padding-top: 1.5rem;
 }
 #hint-image3 {
   border-right: 1px solid #000000;
