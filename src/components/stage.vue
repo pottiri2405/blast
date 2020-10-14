@@ -13,12 +13,38 @@
       </b-row>
       <b-row class="mt-2">
         <b-col>
+          <b-button pill size="sm" variant="outline-primary" @click="clickedClear()">
+            <b-icon icon="question-circle-fill" aria-label="Help"></b-icon>
+            {{ $t("message.how_to_play") }}
+          </b-button>
           <b-button pill size="sm" variant="info" @click="clickedClear()">
             {{ $t("message.checked_clear") }}
           </b-button>
           <b-button pill size="sm" variant="warning" @click="restart()">
             {{ $t("message.restart") }}
           </b-button>
+        </b-col>
+      </b-row>
+      <b-row class="mt-2">
+        <b-col>
+        </b-col>
+      </b-row>
+      <b-row v-for="(cols, y) in data.map" :key="'row-' + y">
+        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" @click="clickBox(x, y)">
+          <b-col border class="box" v-bind:class="{
+            'box-row-last': isLast(y, Object.keys(data.map).length),
+            'box-col-last': isLast(x, Object.keys(cols).length),
+            'answerd-box': isAnsweredBox(x, y),
+            'hint-box': isHintBox(x, y),
+            'clicked-box': isClickedBox(x, y)
+            }">
+            {{ col }}
+          </b-col>
+        </b-link>
+      </b-row>
+      <b-row class="mt-2">
+        <b-col id="timer" class="bg-dark text-light text-center align-middle">
+          {{ timer.time }}
         </b-col>
       </b-row>
       <b-row class="mt-2">
@@ -32,42 +58,51 @@
             <b-card-body>
               <b-container>
                 <b-row v-show="useHint===false">
-                  <b-col id="hint-image1" class="pl-0 no-image"><span>No image</span></b-col>
-                  <b-col id="hint-image2" class="pl-0 no-image"><span>No image</span></b-col>
-                  <b-col id="hint-image3" class="pl-0 no-image"><span>No image</span></b-col>
+                  <b-col class="pl-0" cols="8">
+                    <b-tabs content-class="pt-2">
+                      <b-tab v-for="(v, index) in [1, 2, 3]" v-bind:key="'no-image-tab-' + (index + 1)" v-bind:title="(index + 1)">
+                        <b-container>
+                          <b-row>
+                            <b-col class="no-image pl-0">No image</b-col>
+                          </b-row>
+                        </b-container>
+                      </b-tab>
+                    </b-tabs>
+                  </b-col>
+                  <b-col></b-col>
                 </b-row>
                 <b-row v-show="useHint===true">
-                  <b-col v-for="(image, index) in hint.images" v-bind:key="'hint-image' + (index + 1)" :id="'hint-image' + (index + 1)" class="pl-0" v-bind:class="{'no-image': (image.link.length <= 0)}">
-                    <span v-show="image.link.length <= 0">No image</span>
-                    <span v-show="image.link.length > 0">
-                      <a :href="image.url"><img :src="image.link"></a>
-                    </span>
+                  <b-col class="pl-0" cols="8">
+                    <b-tabs content-class="pt-2">
+                      <b-tab v-for="(image, index) in hint.images" v-bind:key="'hint-tab-' + (index + 1)" v-bind:title="(index + 1)">
+                        <b-container>
+                          <b-row>
+                            <b-col v-show="image.link.length <= 0" class="pl-0 no-image">No image</b-col>
+                            <b-col v-show="image.link.length > 0" class="pl-0 exist-image" :style="{ backgroundImage: 'url(' + image.link + ')' }"></b-col>
+                          </b-row>
+                          <b-row>
+                            <b-col class="pl-0">
+                              <a :href="image.contextLink" target="_blank" class="hint-link">
+                                <b-button pill size="sm" variant="outline-primary" class="image-info w-100">
+                                  {{ image.displayLink }}
+                                </b-button>
+                              </a>
+                            </b-col>
+                          </b-row>
+                          <b-row>
+                            <b-col class="pl-0">
+                              <span class="google-search-result">{{ $t("message.google_search_result") }}</span>
+                            </b-col>
+                          </b-row>
+                        </b-container>
+                      </b-tab>
+                    </b-tabs>
                   </b-col>
+                  <b-col></b-col>
                 </b-row>
               </b-container>
             </b-card-body>
           </b-card>
-        </b-col>
-      </b-row>
-      <b-row class="mb-2">
-        <b-col>
-        </b-col>
-      </b-row>
-      <b-row v-for="(cols, y) in data.map" :key="'row-' + y">
-        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" @click="clickBox(x, y)">
-          <b-col border class="box" v-bind:class="{
-            'box-row-last': isLast(y, Object.keys(data.map).length),
-            'box-col-last': isLast(x, Object.keys(cols).length),
-            'answerd-box': isAnsweredBox(x, y),
-            'clicked-box': isClickedBox(x, y)
-            }">
-            {{ col }}
-          </b-col>
-        </b-link>
-      </b-row>
-      <b-row class="mt-2">
-        <b-col id="timer" class="bg-dark text-light text-center align-middle">
-          {{ timer.time }}
         </b-col>
       </b-row>
     </b-container>
@@ -176,6 +211,8 @@ export default {
         if (this.progress.count >= this.progress.max) {
           this.timerStop()
           this.$refs['modal-complete'].show()
+        } else {
+          this.hint = this.getRandomFromHash(this.data.words)
         }
       }
     },
@@ -184,6 +221,10 @@ export default {
     },
     isAnsweredBox (x, y) {
       return (this.answered.keys.includes(this.getKey(x, y)))
+    },
+    isHintBox (x, y) {
+      if (this.useHint === false) return false
+      return (this.getKey(this.hint.x, this.hint.y) === this.getKey(x, y))
     },
     getNearClickedKeysBox (x, y, axis) {
       let rtn = []
@@ -321,24 +362,9 @@ export default {
   top: 50px;
   left:calc(50% - 50px/2);
 }
-#progress-bar,
-#card-hint {
+#progress-bar {
   max-width: 20rem;
   width: 20rem;
-}
-#card-hint .card-header {
-  padding: 0.25rem 1.25rem !important;
-  text-align: center;
-}
-#card-hint .card-body {
-  padding: 0.25rem !important;
-}
-#card-hint img {
-  width: 100%;
-  height: 100%;
-}
-.no-image {
-  padding-top: 1.25rem !important;
 }
 .box {
   width: 2rem !important;
@@ -364,6 +390,11 @@ export default {
   /* -webkit-animation: flash 1s ease infinite;
   animation: flash 1s ease infinite; */
 }
+.hint-box {
+  /* border: 1px solid #f08080; */
+  -webkit-animation: flash 1s ease infinite;
+  animation: flash 1s ease infinite;
+}
 .clicked-box {
   background-color: #f08080;
   /* -webkit-animation: flash 1s ease infinite;
@@ -377,7 +408,6 @@ export default {
   0% {opacity: 0;}
   100% {opacity: 1;}
 }
-
 #timer {
   font-family: 'Share Tech Mono', sans-serif;
   font-size: x-large;
@@ -387,32 +417,55 @@ export default {
   padding-top: 0.25rem;
   /* border-radius: 50rem; */
 }
-#hint-image1,
-#hint-image2,
-#hint-image3 {
-  font-size: x-small;
-  max-width: 4rem !important;
-  width: 4rem !important;
-  height: 4rem !important;
-  border-top: 1px solid #000000;
-  border-bottom: 1px solid #000000;
-  border-left: 1px solid #000000;
-  background-color: #e9ecef;
-  font-size: 0.8rem;
+#card-hint {
+  max-width: 20rem;
+  width: 20rem;
+}
+#card-hint .card-header {
+  padding: 0.25rem 1.25rem !important;
+  text-align: center;
+}
+#card-hint .card-body {
+  padding: 0.25rem !important;
+}
+/* #card-hint .nav-item {
+  font-size: 0.75rem;
+}
+#card-hint .nav-link {
+  page-break-after: 0.25rem 1rem;
+} */
+#card-hint .no-image {
+  font-size: small;
+  max-width: 6rem !important;
+  width: 6rem !important;
+  height: 6rem !important;
+  border: 1px solid #000000;
   text-align: center !important;
   padding: 0px;
+  padding-top: 2.5rem !important;
+  background-color: #e9ecef;
 }
-#hint-image3 {
-  border-right: 1px solid #000000;
-}
-#hint-image1 span,
-#hint-image2 span,
-#hint-image3 span {
+#card-hint .exist-image {
   font-size: small;
-}
-#hint-google-search {
+  max-width: 6rem !important;
+  min-width: 6rem !important;
+  height: 6rem !important;
+  border: 1px solid #000000;
   text-align: center !important;
-  font-size: 0.8rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+#card-hint .image-info {
+  font-size: x-small;
+  max-width: 6rem !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#card-hint .google-search-result {
+  font-size: x-small;
+  color: grey;
 }
 .modal {
   top: 25% !important;

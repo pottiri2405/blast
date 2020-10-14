@@ -11,7 +11,9 @@
       "checked_clear": "選択クリア",
       "complete_message": "全問正解！",
       "time": "タイム：",
-      "thank_you": "プレイしていただきありがとうございました！"
+      "thank_you": "プレイしていただきありがとうございました！",
+      "how_to_play": "遊び方",
+      "google_search_result": "Google画像検索"
     }
   },
   "en": {
@@ -26,7 +28,9 @@
       "checked_clear": "Clear",
       "complete_message": "Complete",
       "time": "Time:",
-      "thank_you": "Thank you for playing!"
+      "thank_you": "Thank you for playing!",
+      "how_to_play": "How to play",
+      "google_search_result": "Google Image Search"
     }
   }
 }
