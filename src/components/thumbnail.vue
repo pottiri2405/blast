@@ -94,6 +94,6 @@ export default {
   color: #ffffff;
 }
 .tag {
-  font-size: medium !important;
+  font-size: large !important;
 }
 </style>
