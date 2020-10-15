@@ -1,5 +1,7 @@
 <template>
   <div>
+    <b-form-input v-model="image"></b-form-input>    
+    <b-form-input v-model="color"></b-form-input>    
     <b-card
       id="preview"
       no-body
@@ -13,8 +15,8 @@
       <template v-slot:header>
         <h5 class="mb-0 text-center align-middle">{{ $t("message.title") }}</h5>
       </template>
-      <b-card-body class="text-center align-middle">
-        <b-container>
+      <b-card-body class="text-center align-middle" :style="{ backgroundImage: 'url(' + image + ')', 'background-size': 'contain' }">
+        <b-container :style="{ color: color }">
           <b-row>
             <b-col class="text-center align-middle">
               <h3>{{ data.title }}</h3>
@@ -50,7 +52,9 @@
 export default {
   data () {
     return {
-      data: {title: '', size: 0, words: {}, tags: {}}
+      data: {title: '', size: 0, words: {}, tags: {}},
+      color: '#000000',
+      image: '/static/background/monstar-ball.jpg'
     }
   },
   methods: {
