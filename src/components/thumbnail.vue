@@ -34,7 +34,7 @@
       </b-card-body>
       <template v-slot:footer>
         <p class="text-center align-middle">
-          <b-badge pill variant="primary" v-for="(tag, i) in data.tags" :key="'tag-' + i" class="text-light mr-1">
+          <b-badge pill variant="primary" v-for="(tag, i) in data.tags" :key="'tag-' + i" class="mr-1">
             {{ tag }}
           </b-badge>
         </p>
