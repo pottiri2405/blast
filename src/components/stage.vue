@@ -29,20 +29,26 @@
         <b-col>
         </b-col>
       </b-row>
-      <b-row v-for="(cols, y) in data.map" :key="'row-' + y">
-        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" v-touch:start="clickBox(x, y)">
-          <b-col border class="box"
-          v-bind:class="{
-            'box-row-last': isLast(y, data.size),
-            'box-col-last': isLast(x, data.size),
-            'answerd-box': isAnsweredBox(x, y),
-            'hint-box': isHintBox(x, y),
-            'clicked-box': isClickedBox(x, y)
-            }">
-            {{ col }}
-          </b-col>
-        </b-link>
-      </b-row>
+      <b-row class="pl-0">
+        <b-col class="pl-0">
+          <table>
+            <tr v-for="(cols, y) in data.map" :key="'row-' + y">
+              <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" v-touch:start="clickBox(x, y)">
+                <td border class="box"
+                v-bind:class="{
+                  'box-row-last': isLast(y, data.size),
+                  'box-col-last': isLast(x, data.size),
+                  'answerd-box': isAnsweredBox(x, y),
+                  'hint-box': isHintBox(x, y),
+                  'clicked-box': isClickedBox(x, y)
+                  }">
+                  {{ col }}
+                </td>
+              </b-link>
+            </tr>            
+          </table>
+        </b-col>
+      </b-row>      
       <!-- <b-row class="mt-2">
         <b-col id="timer" class="bg-dark text-light text-center align-middle">
           {{ timer.time }}
@@ -347,8 +353,12 @@ export default {
   width: 20rem;
 }
 .box {
-  width: 2rem !important;
-  height: 2rem !important;
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
+  min-width: 2rem !important;
+  min-height: 2rem !important;  
+  max-width: 2rem !important;
+  max-height: 2rem !important;
   text-align: center !important;
   border-top: 1px solid #000000;
   border-left: 1px solid #000000;
