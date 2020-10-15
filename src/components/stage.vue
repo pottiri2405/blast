@@ -13,14 +13,14 @@
       </b-row>
       <b-row class="mt-2">
         <b-col>
-          <b-button pill size="sm" variant="outline-primary" @click="clickedClear()">
+          <b-button pill size="sm" variant="outline-primary" @click="clear()">
             <b-icon icon="question-circle-fill" aria-label="Help"></b-icon>
             {{ $t("message.how_to_play") }}
           </b-button>
-          <b-button pill size="sm" variant="info" @click="clickedClear()">
+          <b-button pill size="sm" variant="info" v-touch="clear">
             {{ $t("message.checked_clear") }}
           </b-button>
-          <b-button pill size="sm" variant="warning" @click="restart()">
+          <b-button pill size="sm" variant="warning" v-touch="restart">
             {{ $t("message.restart") }}
           </b-button>
         </b-col>
@@ -30,10 +30,11 @@
         </b-col>
       </b-row>
       <b-row v-for="(cols, y) in data.map" :key="'row-' + y">
-        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" @click="clickBox(x, y)">
-          <b-col border class="box" v-bind:class="{
-            'box-row-last': isLast(y, Object.keys(data.map).length),
-            'box-col-last': isLast(x, Object.keys(cols).length),
+        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" v-touch="clickBox(x, y)">
+          <b-col border class="box"
+          v-bind:class="{
+            'box-row-last': isLast(y, data.size),
+            'box-col-last': isLast(x, data.size),
             'answerd-box': isAnsweredBox(x, y),
             'hint-box': isHintBox(x, y),
             'clicked-box': isClickedBox(x, y)
@@ -42,11 +43,11 @@
           </b-col>
         </b-link>
       </b-row>
-      <b-row class="mt-2">
+      <!-- <b-row class="mt-2">
         <b-col id="timer" class="bg-dark text-light text-center align-middle">
           {{ timer.time }}
         </b-col>
-      </b-row>
+      </b-row> -->
       <b-row class="mt-2">
         <b-col class="ml-0 pl-0">
           <b-card no-body id="card-hint">
@@ -60,7 +61,7 @@
                 <b-row v-show="useHint===false">
                   <b-col class="pl-0" cols="8">
                     <b-tabs content-class="pt-2">
-                      <b-tab v-for="(v, index) in [1, 2, 3]" v-bind:key="'no-image-tab-' + (index + 1)" v-bind:title="(index + 1)">
+                      <b-tab v-for="(v, index) in [1, 2, 3]" v-bind:key="'no-image-tab-' + (index + 1)" v-bind:title="String(index + 1)">
                         <b-container>
                           <b-row>
                             <b-col class="no-image pl-0">No image</b-col>
@@ -74,7 +75,7 @@
                 <b-row v-show="useHint===true">
                   <b-col class="pl-0" cols="8">
                     <b-tabs content-class="pt-2">
-                      <b-tab v-for="(image, index) in hint.images" v-bind:key="'hint-tab-' + (index + 1)" v-bind:title="(index + 1)">
+                      <b-tab v-for="(image, index) in hint.images" v-bind:key="'hint-tab-' + (index + 1)" v-bind:title="String(index + 1)">
                         <b-container>
                           <b-row>
                             <b-col v-show="image.link.length <= 0" class="pl-0 no-image">No image</b-col>
@@ -106,11 +107,11 @@
         </b-col>
       </b-row>
     </b-container>
-    <b-modal ref="modal-start" size="md" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
+    <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
-            <b-button pill block variant="primary" @click="gameStart()">{{ $t("message.start")}}</b-button>
+            <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
           </b-col>
         </b-row>
         <b-row class="mt-3">
@@ -147,7 +148,7 @@
               </span>
             </p>
             <p>{{ $t("message.thank_you") }}</p>
-            <b-button pill size="sm" variant="warning" @click="restart()">
+            <b-button pill size="sm" variant="warning" v-touch="restart">
               {{ $t("message.restart") }}
             </b-button>
           </b-col>
@@ -173,46 +174,47 @@ export default {
     }
   },
   methods: {
-    isLast (idx, length) {
-      return (idx >= length)
-    },
-    clickedClear () {
+    clear () {
       this.clicked.keys.length = 0
       this.clicked.axis = ''
     },
-    async clickBox (x, y) {
-      let key = this.getKey(x, y)
-      if (this.clicked.keys.indexOf(key) !== -1) {
-        if (this.clicked.keys.slice(-1)[0] === key) {
-          this.clicked.keys.pop()
+    clickBox (x, y) {
+      let $vm = this;
+      return function(event) {
+        let key = $vm.getKey(x, y)
+        if ($vm.clicked.keys.indexOf(key) !== -1) {
+          if ($vm.clicked.keys.slice(-1)[0] === key) {
+            $vm.clicked.keys.pop()
+          }
+          if ($vm.clicked.keys.length <= 1) {
+            $vm.clicked.axis = ''
+          }
+          return
         }
-        if (this.clicked.keys.length <= 1) {
-          this.clicked.axis = ''
+        if ($vm.clicked.keys.length <= 0 || $vm.getNearClickedKeysBox(x, y, $vm.clicked.axis).length > 0) {
+          if ($vm.clicked.keys.length === 1) {
+            $vm.clicked.axis = $vm.getClickedAxis(x, y)
+          }
+          $vm.clicked.keys.push(key)
         }
-        return
-      }
-      if (this.clicked.keys.length <= 0 || this.getNearClickedKeysBox(x, y, this.clicked.axis).length > 0) {
-        if (this.clicked.keys.length === 1) {
-          this.clicked.axis = this.getClickedAxis(x, y)
-        }
-        this.clicked.keys.push(key)
-      }
-      let word = this.combineClickedKeysChars()
-      if (this.data.words[word] && this.answered.words.includes(word) === false) {
-        this.answered.words.push(word)
-        this.answered.keys = this.answered.keys.concat(this.clicked.keys)
-        this.clickedClear()
-        this.progress.count++
-        this.correct.word = word
-        delete this.data.words[word]
-        this.$refs['modal-correct'].show()
-        await this.sleep(1000)
-        this.$refs['modal-correct'].hide()
-        if (this.progress.count >= this.progress.max) {
-          this.timerStop()
-          this.$refs['modal-complete'].show()
-        } else {
-          this.hint = this.getRandomFromHash(this.data.words)
+        let word = $vm.combineClickedKeysChars()
+        if ($vm.data.words[word] && $vm.answered.words.includes(word) === false) {
+          $vm.answered.words.push(word)
+          $vm.answered.keys = $vm.answered.keys.concat($vm.clicked.keys)
+          $vm.clear()
+          $vm.progress.count++
+          $vm.correct.word = word
+          delete $vm.data.words[word]
+          $vm.$refs['modal-correct'].show()
+          setTimeout (function() {
+            $vm.$refs['modal-correct'].hide()
+            if ($vm.progress.count >= $vm.progress.max) {
+              $vm.timerStop()
+              $vm.$refs['modal-complete'].show()
+            } else {
+              $vm.hint = $vm.getRandomFromHash($vm.data.words)
+            }       
+          }, 1000)
         }
       }
     },

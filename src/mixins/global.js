@@ -13,6 +13,9 @@ export default {
       this.$router.push({name: 'tracker', params: { keyword: keyword }})
       this.$router.go({path: this.$router.currentRoute.path, force: true})
     },
+    isLast (idx, length) {
+      return (idx >= length)
+    },
     zeroPrefix (num, digit) {
       var zero = ''
       for (var i = 0; i < digit; i++) {
