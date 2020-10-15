@@ -10,7 +10,9 @@ import 'bootstrap-vue/dist/bootstrap-vue.css' // added
 Vue.use(Router)
 Vue.use(BootstrapVue) // added
 Vue.use(BootstrapVueIcons) // added
-Vue.use(Vue2TouchEvents) // added
+Vue.use(Vue2TouchEvents, { // added
+  tapTolerance: 5
+})
 
 export default new Router({
   routes: [
