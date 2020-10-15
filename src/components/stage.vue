@@ -13,8 +13,8 @@
       </b-row>
       <b-row class="mt-2">
         <b-col>
-          <b-button pill size="sm" variant="outline-primary" @click="clear()">
-            <b-icon icon="question-circle-fill" aria-label="Help"></b-icon>
+          <b-button pill size="sm" variant="outline-primary" v-b-modal.modal-how-to-play>
+            <b-icon icon="question-circle-fill" aria-label="How to play"></b-icon>
             {{ $t("message.how_to_play") }}
           </b-button>
           <b-button pill size="sm" variant="info" v-touch="clear">
@@ -30,7 +30,7 @@
         </b-col>
       </b-row>
       <b-row v-for="(cols, y) in data.map" :key="'row-' + y">
-        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" v-touch="clickBox(x, y)">
+        <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" v-touch:start="clickBox(x, y)">
           <b-col border class="box"
           v-bind:class="{
             'box-row-last': isLast(y, data.size),
@@ -126,6 +126,8 @@
         </b-row>
       </b-container>
     </b-modal>
+    <b-modal id="modal-how-to-play" size="xl" hide-footer v-bind:title="$t('message.how_to_play')">
+    </b-modal>
     <b-modal ref="modal-correct" size="md" hide-header hide-footer no-close-on-esc no-close-on-backdrop clas="middle">
       <b-container>
         <b-row>
@@ -179,8 +181,8 @@ export default {
       this.clicked.axis = ''
     },
     clickBox (x, y) {
-      let $vm = this;
-      return function(event) {
+      let $vm = this
+      return function (event) {
         let key = $vm.getKey(x, y)
         if ($vm.clicked.keys.indexOf(key) !== -1) {
           if ($vm.clicked.keys.slice(-1)[0] === key) {
@@ -206,14 +208,14 @@ export default {
           $vm.correct.word = word
           delete $vm.data.words[word]
           $vm.$refs['modal-correct'].show()
-          setTimeout (function() {
+          setTimeout(function () {
             $vm.$refs['modal-correct'].hide()
             if ($vm.progress.count >= $vm.progress.max) {
               $vm.timerStop()
               $vm.$refs['modal-complete'].show()
             } else {
               $vm.hint = $vm.getRandomFromHash($vm.data.words)
-            }       
+            }
           }, 1000)
         }
       }

@@ -37,9 +37,7 @@ export default {
     getRandomFromHash (hash) {
       let keys = Object.keys(hash)
       let idx = this.getRandomInt(keys.length - 1)
-      this.logging(keys[idx])
       let rtn = hash[keys[idx]]
-      this.logging(rtn)
       return rtn
     }
 
