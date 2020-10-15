@@ -13,10 +13,10 @@
       </b-row>
       <b-row class="mt-2">
         <b-col>
-          <b-button pill size="sm" variant="outline-primary" v-b-modal.modal-how-to-play>
+          <!-- <b-button pill size="sm" variant="outline-primary" v-b-modal.modal-how-to-play>
             <b-icon icon="question-circle-fill" aria-label="How to play"></b-icon>
             {{ $t("message.how_to_play") }}
-          </b-button>
+          </b-button> -->
           <b-button pill size="sm" variant="info" v-touch="clear">
             {{ $t("message.checked_clear") }}
           </b-button>
@@ -83,7 +83,7 @@
         </b-col>
       </b-row>
     </b-container>
-    <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
+    <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop class="middle">
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
