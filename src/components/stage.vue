@@ -57,49 +57,25 @@
               </b-form-checkbox>
             </template>
             <b-card-body>
-              <b-container>
-                <b-row v-show="useHint===false">
-                  <b-col class="pl-0" cols="8">
-                    <b-tabs content-class="pt-2">
-                      <b-tab v-for="(v, index) in [1, 2, 3]" v-bind:key="'no-image-tab-' + (index + 1)" v-bind:title="String(index + 1)">
-                        <b-container>
-                          <b-row>
-                            <b-col class="no-image pl-0">No image</b-col>
-                          </b-row>
-                        </b-container>
-                      </b-tab>
-                    </b-tabs>
-                  </b-col>
+              <b-container v-show="useHint===false">
+                <b-row v-for="(v, index) in [1, 2, 3]" v-bind:key="'no-hint-row-' + index" class="mt-1">
+                  <b-col class="no-image text-center">No image</b-col>
                   <b-col></b-col>
                 </b-row>
-                <b-row v-show="useHint===true">
-                  <b-col class="pl-0" cols="8">
-                    <b-tabs content-class="pt-2">
-                      <b-tab v-for="(image, index) in hint.images" v-bind:key="'hint-tab-' + (index + 1)" v-bind:title="String(index + 1)">
-                        <b-container>
-                          <b-row>
-                            <b-col v-show="image.link.length <= 0" class="pl-0 no-image">No image</b-col>
-                            <b-col v-show="image.link.length > 0" class="pl-0 exist-image" :style="{ backgroundImage: 'url(' + image.link + ')' }"></b-col>
-                          </b-row>
-                          <b-row>
-                            <b-col class="pl-0">
-                              <a :href="image.contextLink" target="_blank" class="hint-link">
-                                <b-button pill size="sm" variant="outline-primary" class="image-info w-100">
-                                  {{ image.displayLink }}
-                                </b-button>
-                              </a>
-                            </b-col>
-                          </b-row>
-                          <b-row>
-                            <b-col class="pl-0">
-                              <span class="google-search-result">{{ $t("message.google_search_result") }}</span>
-                            </b-col>
-                          </b-row>
-                        </b-container>
-                      </b-tab>
-                    </b-tabs>
+              </b-container>
+              <b-container v-show="useHint===true">
+                <b-row v-for="(image, index) in hint.images" v-bind:key="'hint-row-' + index" class="mt-1">
+                  <b-col v-show="image.link.length <= 0" class="no-image text-center">No image</b-col>
+                  <b-col v-show="image.link.length > 0" class="exist-image text-center" :style="{ backgroundImage: 'url(' + image.link + ')' }"></b-col>
+                  <b-col class="text-center">
+                    <a :href="image.contextLink" target="_blank" class="hint-link">
+                      <b-button pill size="sm" variant="outline-primary" class="image-info w-100">
+                        {{ image.displayLink }}
+                      </b-button>
+                    </a>
+                    <br>
+                    <span class="google-search-result">{{ $t("message.google_search_result") }}</span>
                   </b-col>
-                  <b-col></b-col>
                 </b-row>
               </b-container>
             </b-card-body>
@@ -432,28 +408,22 @@ export default {
 #card-hint .card-body {
   padding: 0.25rem !important;
 }
-/* #card-hint .nav-item {
-  font-size: 0.75rem;
-}
-#card-hint .nav-link {
-  page-break-after: 0.25rem 1rem;
-} */
 #card-hint .no-image {
   font-size: small;
-  max-width: 6rem !important;
-  width: 6rem !important;
-  height: 6rem !important;
+  max-width: 5rem !important;
+  width: 5rem !important;
+  height: 5rem !important;
   border: 1px solid #000000;
   text-align: center !important;
   padding: 0px;
-  padding-top: 2.5rem !important;
+  padding-top: 1.75rem !important;
   background-color: #e9ecef;
 }
 #card-hint .exist-image {
   font-size: small;
-  max-width: 6rem !important;
-  min-width: 6rem !important;
-  height: 6rem !important;
+  max-width: 5rem !important;
+  min-width: 5rem !important;
+  height: 5rem !important;
   border: 1px solid #000000;
   text-align: center !important;
   background-size: contain;
@@ -462,7 +432,6 @@ export default {
 }
 #card-hint .image-info {
   font-size: x-small;
-  max-width: 6rem !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -471,7 +440,7 @@ export default {
   font-size: x-small;
   color: grey;
 }
-.modal {
+.modal.middle {
   top: 25% !important;
 }
 </style>
