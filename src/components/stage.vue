@@ -357,8 +357,8 @@ export default {
   cursor: pointer;
   min-width: 1.75rem !important;
   min-height: 1.75rem !important;
-  min-width: 2rem !important;
-  min-height: 2rem !important;  
+  max-width: 2rem !important;
+  max-height: 2rem !important;  
   max-width: 2rem !important;
   max-height: 2rem !important;
   text-align: center !important;
@@ -369,7 +369,7 @@ export default {
   background-color: #fffaf0;
   color: #000000;
   padding: 0px;
-  padding-top: 0.25rem;
+  /* padding-top: 0.25rem; */
 }
 .box-row-last {
   border-bottom: 1px solid #000000;
