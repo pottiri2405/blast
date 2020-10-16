@@ -33,18 +33,20 @@
         <b-col class="pl-0">
           <table>
             <tr v-for="(cols, y) in data.map" :key="'row-' + y">
-              <b-link href="#" v-for="(col, x) in cols" :key="'col-' + y + '-' + x" v-touch:start="clickBox(x, y)">
-                <td border class="box"
-                v-bind:class="{
-                  'box-row-last': isLast(y, data.size),
-                  'box-col-last': isLast(x, data.size),
-                  'answerd-box': isAnsweredBox(x, y),
-                  'hint-box': isHintBox(x, y),
-                  'clicked-box': isClickedBox(x, y)
-                  }">
-                  {{ col }}
-                </td>
-              </b-link>
+              <td border
+              v-for="(col, x) in cols"
+              :key="'col-' + y + '-' + x"
+              v-touch:start="clickBox(x, y)"
+              class="box"
+              v-bind:class="{
+                'box-row-last': isLast(y, data.size),
+                'box-col-last': isLast(x, data.size),
+                'answerd-box': isAnsweredBox(x, y),
+                'hint-box': isHintBox(x, y),
+                'clicked-box': isClickedBox(x, y)
+                }">
+                {{ col }}
+              </td>
             </tr>            
           </table>
         </b-col>
@@ -353,6 +355,7 @@ export default {
   width: 20rem;
 }
 .box {
+  cursor: pointer;
   min-width: 1.75rem !important;
   min-height: 1.75rem !important;
   min-width: 2rem !important;
