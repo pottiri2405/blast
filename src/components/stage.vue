@@ -92,23 +92,22 @@
       </b-row>
     </b-container>
     <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop class="middle">
-      <b-container>
-        <b-row>
-          <b-col class="text-center align-middle">
-            <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
-          </b-col>
-        </b-row>
-        <b-row class="mt-3">
-          <b-col class="text-center align-middle">
-            <h5>{{ $t("message.thumbnail_size") }}{{ data.size }} ✕ {{ data.size }}</h5>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col class="text-center align-middle">
-            <h5>{{ $t("message.thumbnail_word_count") }}{{ Object.keys(data.words).length }}</h5>
-          </b-col>
-        </b-row>
-      </b-container>
+      <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
+      <template v-slot:footer>
+        <p class="text-center align-middle">
+          <b-badge variant="primary" class="tag mr-1">
+            {{ $t('message.thumbnail_size', { size: data.size }) }}
+          </b-badge>
+          <b-badge variant="primary" class="tag">
+            {{ $t('message.thumbnail_word_count', { count: Object.keys(data.words).length }) }}
+          </b-badge>
+        </p>
+        <p class="text-center align-middle">
+          <b-badge variant="info" v-for="(tag, i) in data.tags" :key="'tag-' + i" class="tag mr-1">
+            {{ tag }}
+          </b-badge>
+        </p>
+      </template>      
     </b-modal>
     <b-modal id="modal-how-to-play" size="xl" hide-footer v-bind:title="$t('message.how_to_play')">
     </b-modal>

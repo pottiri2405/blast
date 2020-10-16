@@ -8,7 +8,7 @@
           {value: '/static/background/fruit.jpg', text: 'フルーツ'},
           {value: '/static/background/moon.jpg', text: '月'},
           {value: '/static/background/wisteria.jpg', text: '藤の花'},
-          {value: '/static/background/monstar-ball,jpg', text: 'モンスターボール'},
+          {value: '/static/background/monstar-ball.jpg', text: 'モンスターボール'},
           ]"
           size="sm"
           class="mt-3">
