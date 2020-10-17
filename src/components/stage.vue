@@ -92,7 +92,7 @@
               {{ $t("message.next_word_hint") }}
             </p>
             <p>
-              <b-badge variant="info" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="tag mr-1">
+              <b-badge variant="info" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="tag mb-1 mr-1">
                 {{ tag }}
               </b-badge>
             </p>
