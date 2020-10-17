@@ -27,6 +27,9 @@
       </b-row>
       <b-row class="mt-2">
         <b-col>
+          <b-form-checkbox v-model="useHint" name="check-hint" switch>
+            {{ $t("message.hint") }}
+          </b-form-checkbox>
         </b-col>
       </b-row>
       <b-row class="pl-0">
@@ -47,67 +50,31 @@
                 }">
                 {{ col }}
               </td>
-            </tr>            
+            </tr>
           </table>
         </b-col>
-      </b-row>      
+      </b-row>
       <!-- <b-row class="mt-2">
         <b-col id="timer" class="bg-dark text-light text-center align-middle">
           {{ timer.time }}
         </b-col>
       </b-row> -->
-      <b-row class="mt-2">
-        <b-col class="ml-0 pl-0">
-          <b-card no-body id="card-hint">
-            <template v-slot:header>
-              <b-form-checkbox v-model="useHint" name="check-hint" switch>
-                {{ $t("message.hint") }}
-              </b-form-checkbox>
-            </template>
-            <b-card-body>
-              <b-container v-show="useHint===false">
-                <b-row v-for="(v, index) in [1, 2, 3]" v-bind:key="'no-hint-row-' + index" class="mt-1">
-                  <b-col class="no-image text-center">No image</b-col>
-                  <b-col></b-col>
-                </b-row>
-              </b-container>
-              <b-container v-show="useHint===true">
-                <b-row v-for="(image, index) in hint.images" v-bind:key="'hint-row-' + index" class="mt-1">
-                  <b-col v-show="image.link.length <= 0" class="no-image text-center">No image</b-col>
-                  <b-col v-show="image.link.length > 0" class="exist-image text-center" :style="{ backgroundImage: 'url(' + image.link + ')' }"></b-col>
-                  <b-col class="text-center">
-                    <a :href="image.contextLink" target="_blank" class="hint-link">
-                      <b-button pill size="sm" variant="outline-primary" class="image-info w-100">
-                        {{ image.displayLink }}
-                      </b-button>
-                    </a>
-                    <br>
-                    <span class="google-search-result">{{ $t("message.google_search_result") }}</span>
-                  </b-col>
-                </b-row>
-              </b-container>
-            </b-card-body>
-          </b-card>
-        </b-col>
-      </b-row>
     </b-container>
     <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop class="middle">
       <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
-      <template v-slot:footer>
-        <p class="text-center align-middle">
-          <b-badge variant="primary" class="tag mr-1">
-            {{ $t('message.thumbnail_size', { size: data.size }) }}
-          </b-badge>
-          <b-badge variant="primary" class="tag">
-            {{ $t('message.thumbnail_word_count', { count: Object.keys(data.words).length }) }}
-          </b-badge>
-        </p>
-        <p class="text-center align-middle">
-          <b-badge variant="info" v-for="(tag, i) in data.tags" :key="'tag-' + i" class="tag mr-1">
-            {{ tag }}
-          </b-badge>
-        </p>
-      </template>      
+      <p class="mt-3 text-center align-middle">
+        <b-badge variant="primary" class="tag mr-1">
+          {{ $t('message.thumbnail_size', { size: data.size }) }}
+        </b-badge>
+        <b-badge variant="primary" class="tag">
+          {{ $t('message.thumbnail_word_count', { count: Object.keys(data.words).length }) }}
+        </b-badge>
+      </p>
+      <p class="text-center align-middle">
+        <b-badge variant="info" v-for="(tag, i) in data.tags" :key="'tag-' + i" class="tag mr-1">
+          {{ tag }}
+        </b-badge>
+      </p>
     </b-modal>
     <b-modal id="modal-how-to-play" size="xl" hide-footer v-bind:title="$t('message.how_to_play')">
     </b-modal>
@@ -117,6 +84,18 @@
           <b-col class="text-center align-middle">
             <h3>{{ correct.word }}</h3>
             <p>{{ correct.text }}</p>
+          </b-col>
+        </b-row>
+        <b-row v-if="useHint===true" class="text-center align-middle">
+          <b-col>
+            <p class="text-center align-middle">
+              {{ $t("message.next_word_hint") }}
+            </p>
+            <p>
+              <b-badge variant="info" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="tag mr-1">
+                {{ tag }}
+              </b-badge>
+            </p>
           </b-col>
         </b-row>
       </b-container>
@@ -190,16 +169,23 @@ export default {
           $vm.progress.count++
           $vm.correct.word = word
           delete $vm.data.words[word]
+          let timeout = 1000;
+          if ($vm.progress.count < $vm.progress.max) {
+            $vm.hint = $vm.getRandomFromHash($vm.data.words)
+            if ($vm.useHint === true) {
+              timeout = 3000;
+            }
+          } else {
+            $vm.useHint = false
+          }
           $vm.$refs['modal-correct'].show()
           setTimeout(function () {
             $vm.$refs['modal-correct'].hide()
             if ($vm.progress.count >= $vm.progress.max) {
               $vm.timerStop()
               $vm.$refs['modal-complete'].show()
-            } else {
-              $vm.hint = $vm.getRandomFromHash($vm.data.words)
             }
-          }, 1000)
+          }, timeout)
         }
       }
     },
@@ -358,7 +344,7 @@ export default {
   min-width: 1.75rem !important;
   min-height: 1.75rem !important;
   max-width: 2rem !important;
-  max-height: 2rem !important;  
+  max-height: 2rem !important;
   max-width: 2rem !important;
   max-height: 2rem !important;
   text-align: center !important;
@@ -454,5 +440,8 @@ export default {
 }
 .modal.middle {
   top: 25% !important;
+}
+.tag {
+  font-size: small !important;
 }
 </style>

@@ -13,9 +13,9 @@
           size="sm"
           class="mt-3">
           </b-form-select>
-          <b-form-input v-model="image"></b-form-input>    
-          <b-form-input v-model="color" size="sm" ></b-form-input>    
-          <b-form-input v-model="position" size="sm" ></b-form-input>    
+          <b-form-input v-model="image"></b-form-input>
+          <b-form-input v-model="color" size="sm" ></b-form-input>
+          <b-form-input v-model="position" size="sm" ></b-form-input>
         </b-col>
       </b-row>
       <b-row>
@@ -60,8 +60,8 @@
           </b-button>
           <div id="result"></div>
         </b-col>
-      </b-row> 
-    </b-container>           
+      </b-row>
+    </b-container>
   </div>
 </template>
 <script>

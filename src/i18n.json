@@ -13,7 +13,8 @@
       "time": "タイム：",
       "thank_you": "プレイしていただきありがとうございました！",
       "how_to_play": "遊び方",
-      "google_search_result": "Google画像検索"
+      "google_search_result": "Google画像検索",
+      "next_word_hint": "＜次のワードのヒント＞"
     }
   },
   "en": {
@@ -30,7 +31,8 @@
       "time": "Time:",
       "thank_you": "Thank you for playing!",
       "how_to_play": "How to play",
-      "google_search_result": "Google Image Search"
+      "google_search_result": "Google Image Search",
+      "next_word_hint": "<Next word hint>"
     }
   }
 }
