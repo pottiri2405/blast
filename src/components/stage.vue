@@ -31,7 +31,7 @@
             {{ $t("message.hint") }}
           </b-form-checkbox>
           <p v-if="useHint===true" class="align-middle">
-            <b-badge variant="light" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="tag mb-1 mr-1">
+            <b-badge variant="light" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="mb-1 mr-1">
               #{{ tag }}
             </b-badge>
           </p>          
