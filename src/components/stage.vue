@@ -30,6 +30,11 @@
           <b-form-checkbox v-model="useHint" name="check-hint" switch>
             {{ $t("message.hint") }}
           </b-form-checkbox>
+          <p v-if="useHint===true" class="align-middle">
+            <b-badge variant="light" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="tag mb-1 mr-1">
+              #{{ tag }}
+            </b-badge>
+          </p>          
         </b-col>
       </b-row>
       <b-row class="pl-0">
@@ -91,9 +96,9 @@
             <p class="text-center align-middle">
               {{ $t("message.next_word_hint") }}
             </p>
-            <p>
-              <b-badge variant="info" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="tag mb-1 mr-1">
-                {{ tag }}
+            <p class="text-center align-middle">
+              <b-badge variant="light" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="tag mb-1 mr-1">
+                #{{ tag }}
               </b-badge>
             </p>
           </b-col>

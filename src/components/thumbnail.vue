@@ -9,6 +9,7 @@
           {value: '/static/background/moon.jpg', text: '月'},
           {value: '/static/background/wisteria.jpg', text: '藤の花'},
           {value: '/static/background/monstar-ball.jpg', text: 'モンスターボール'},
+          {value: '/static/background/treasure.jpg', text: '宝箱'},
           ]"
           size="sm"
           class="mt-3">
