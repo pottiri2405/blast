@@ -11,6 +11,7 @@
           {value: '/static/background/monstar-ball.jpg', text: 'モンスターボール'},
           {value: '/static/background/treasure.jpg', text: '宝箱'},
           {value: '/static/background/famicom.jpg', text: 'ファミコン'},
+          {value: '/static/background/gccx.jpg', text: 'GCCX'}
           ]"
           size="sm"
           class="mt-3">

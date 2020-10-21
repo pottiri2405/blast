@@ -34,7 +34,7 @@
             <b-badge variant="light" v-for="(tag, i) in hint.tags" :key="'hint-tag-' + i" class="mb-1 mr-1">
               #{{ tag }}
             </b-badge>
-          </p>          
+          </p>
         </b-col>
       </b-row>
       <b-row class="pl-0">
@@ -167,6 +167,9 @@ export default {
           $vm.clicked.keys.push(key)
         }
         let word = $vm.combineClickedKeysChars()
+        console.log(word)
+        console.log($vm.data.words)
+        console.log($vm.answered.words)
         if ($vm.data.words[word] && $vm.answered.words.includes(word) === false) {
           $vm.answered.words.push(word)
           $vm.answered.keys = $vm.answered.keys.concat($vm.clicked.keys)
