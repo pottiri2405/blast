@@ -40,6 +40,5 @@ export default {
       let rtn = hash[keys[idx]]
       return rtn
     }
-
   }
 }

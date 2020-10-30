@@ -2,6 +2,7 @@ import Vue from 'vue'
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue' // added
 import Router from 'vue-router'
 import stage from '@/components/stage' // added
+import maze from '@/components/maze' // added
 import thumbnail from '@/components/thumbnail' // added
 import Vue2TouchEvents from 'vue2-touch-events' // added
 import 'bootstrap/dist/css/bootstrap.css' // added
@@ -20,6 +21,11 @@ export default new Router({
       path: '/stage/:id/:language',
       name: 'stage',
       component: stage
+    },
+    {
+      path: '/maze/:id/:language',
+      name: 'maze',
+      component: maze
     },
     {
       path: '/thumbnail/:id/:language',

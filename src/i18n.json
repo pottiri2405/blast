@@ -10,11 +10,12 @@
       "google_search": "Google 画像検索",
       "checked_clear": "選択クリア",
       "complete_message": "全問正解！",
+      "goal_message": "GOAL!",
+      "failure_message": "失敗・・・",
       "time": "タイム：",
       "thank_you": "プレイしていただきありがとうございました！",
       "how_to_play": "遊び方",
-      "google_search_result": "Google画像検索",
-      "next_word_hint": "＜次のワードのヒント＞"
+      "google_search_result": "Google画像検索"
     }
   },
   "en": {
@@ -27,7 +28,9 @@
       "thumbnail_word_count": "Word count:{count}",
       "google_search": "Google image search",
       "checked_clear": "Clear",
-      "complete_message": "Complete",
+      "complete_message": "COMPLETE!",
+      "goal_message": "GOAL!",
+      "failure_message": "FAILURE...",
       "time": "Time:",
       "thank_you": "Thank you for playing!",
       "how_to_play": "How to play",
