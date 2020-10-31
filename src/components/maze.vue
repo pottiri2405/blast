@@ -31,7 +31,7 @@
               :key="'col-' + y + '-' + x"
               v-touch:start="clickBox(x, y)"
               class="box"
-              v-bind:font-size="data.size < 10 ? 'large' : 'inherit'"
+              v-bind:font-size="data.size < 10 ? 'x-large' : 'large'"
               v-bind:class="{
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
