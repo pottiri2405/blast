@@ -31,6 +31,7 @@
               :key="'col-' + y + '-' + x"
               v-touch:start="clickBox(x, y)"
               class="box"
+              v-bind:font-size="data.size < 10 ? 'large' : 'inherit'"
               v-bind:class="{
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
@@ -371,13 +372,10 @@ export default {
 }
 .box {
   cursor: pointer;
-  min-width: 1.75rem !important;
-  min-height: 1.75rem !important;
-  max-width: 2rem !important;
-  max-height: 2rem !important;
-  max-width: 2rem !important;
-  max-height: 2rem !important;
+  min-width: 2rem !important;
+  min-height: 2rem !important;
   text-align: center !important;
+  vertical-align: middle !important;
   border-top: 1px solid #000000;
   border-left: 1px solid #000000;
   padding-left: 0px !important;
@@ -385,7 +383,6 @@ export default {
   background-color: #fffaf0;
   color: #000000;
   padding: 0px;
-  /* padding-top: 0.25rem; */
 }
 .box-row-last {
   border-bottom: 1px solid #000000;
