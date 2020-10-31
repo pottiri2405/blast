@@ -3,13 +3,13 @@
     <b-spinner v-show="init===true" id="init-loading" label="Large Spinner"></b-spinner>
     <b-container v-show="init===false">
       <b-row class="mt-2">
-        <b-col class="pl-0">
+        <b-col>
           <b-icon v-for="n in life.max - life.remaining" v-bind:key="'heart-' + n" icon="heart" variant="danger" v-bind:class="{'ml-1': (n > 1)}"></b-icon>
           <b-icon v-for="n in life.remaining" v-bind:key="'heart-fill-' + n" icon="heart-fill" variant="danger" v-bind:class="{'ml-1': (n > 1)}"></b-icon>
         </b-col>
       </b-row>
       <b-row class="mt-2">
-        <b-col class="pl-0">
+        <b-col>
           <!-- <b-button pill size="sm" variant="outline-primary" v-b-modal.modal-how-to-play>
             <b-icon icon="question-circle-fill" aria-label="How to play"></b-icon>
             {{ $t("message.how_to_play") }}
@@ -23,7 +23,7 @@
         </b-col>
       </b-row>
       <b-row class="mt-2">
-        <b-col class="pl-0">
+        <b-col>
           <table>
             <tr v-for="(cols, y) in data.map" :key="'row-' + y">
               <td border
