@@ -372,7 +372,7 @@ export default {
 }
 .box {
   cursor: pointer;
-  width: 2rem !important;
+  min-width: 2rem !important;
   text-align: center !important;
   vertical-align: middle !important;
   border-top: 1px solid #000000;
@@ -385,7 +385,7 @@ export default {
 }
 .box-large {
   font-size: x-large;
-  width: 2.5rem !important;
+  min-width: 2.5rem !important;
 }
 .box-row-last {
   border-bottom: 1px solid #000000;
