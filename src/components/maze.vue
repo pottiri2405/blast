@@ -22,7 +22,7 @@
           </b-button>
         </b-col>
       </b-row>
-      <b-row class="mt-2 pl-0">
+      <b-row class="mt-2">
         <b-col class="pl-0">
           <table>
             <tr v-for="(cols, y) in data.map" :key="'row-' + y">
