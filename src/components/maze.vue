@@ -10,10 +10,6 @@
       </b-row>
       <b-row class="mt-2">
         <b-col>
-          <!-- <b-button pill size="sm" variant="outline-primary" v-b-modal.modal-how-to-play>
-            <b-icon icon="question-circle-fill" aria-label="How to play"></b-icon>
-            {{ $t("message.how_to_play") }}
-          </b-button> -->
           <b-button pill size="sm" variant="info" v-touch="clear">
             {{ $t("message.checked_clear") }}
           </b-button>
@@ -32,7 +28,7 @@
               v-touch:start="clickBox(x, y)"
               class="box"
               v-bind:class="{
-                'box-large': (data.size < 10),                
+                'box-large': (data.size < 10),
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
                 'answerd-box': isAnsweredBox(x, y),
@@ -131,7 +127,6 @@ export default {
   data () {
     return {
       init: true,
-      language: 'en',
       timer: {time: '00:00:00.000', began: null, stopped: null, duration: 0, started: null, running: false},
       data: {map: {}, words: {}},
       life: {remaining: 0, max: 100},
@@ -175,7 +170,11 @@ export default {
           $vm.answered.keys = $vm.answered.keys.concat($vm.clicked.keys)
           for (let k of $vm.clicked.keys) {
             if (Object.keys($vm.star.pioneered).includes(k)) continue
-            $vm.star.pioneered[k] = {index: Object.keys($vm.star.pioneered).length + 1, word: word, keys: [...$vm.clicked.keys]}
+            $vm.star.pioneered[k] = {
+              index: Object.keys($vm.star.pioneered).length + 1,
+              word: word,
+              axis: $vm.clicked.axis,
+              keys: [...$vm.clicked.keys]}
           }
           $vm.life.remaining--
           $vm.correct.word = word
@@ -195,8 +194,10 @@ export default {
       }
     },
     async moveStar () {
+      let current = null
       let next = null
       do {
+        current = this.star.pioneered[this.star.current] ? this.star.pioneered[this.star.current] : null
         next = null
         let xy = this.star.current.split('-')
         let index = null
@@ -204,16 +205,23 @@ export default {
           let mx = parseInt(xy[0]) + d.fx
           let my = parseInt(xy[1]) + d.fy
           let mkey = this.getKey(mx, my)
-          if (this.isPioneered(mx, my) === true && this.isPassed(mx, my) === false) {
-            if (index === null || this.star.pioneered[mkey].index < index) {
-              index = this.star.pioneered[mkey].index
-              next = mkey
-            }
+          // 通れない場所はスキップ
+          if (this.isPioneered(mx, my) === false || this.isPassed(mx, my) === true) {
+            continue
+          }
+          // 逆走防止
+          if (current !== null && current.word === this.star.pioneered[mkey].word && current.axis !== d.axis) {
+            continue
+          }
+          // 一番古い道優先
+          if (index === null || this.star.pioneered[mkey].index < index) {
+            index = this.star.pioneered[mkey].index
+            next = mkey
           }
         }
         if (next !== null) {
-          if (this.star.pioneered[this.star.current] && this.star.pioneered[this.star.current].word !== this.star.pioneered[next].word) {
-            this.star.passed = this.star.passed.concat(this.star.pioneered[this.star.current].keys)
+          if (current !== null && current.word !== this.star.pioneered[next].word) {
+            this.star.passed = this.star.passed.concat(current.keys)
           }
           this.star.passed.push(this.star.current)
           this.star.current = next
@@ -338,8 +346,7 @@ export default {
   mounted () {
     let $vm = this
     $vm.logging(process.env)
-    $vm.language = process.env.language
-    // $vm.$refs['loading-modal'].show()
+    $vm.$i18n.locale = $vm.$route.params.language
     let url = 'https://script.google.com/macros/s/AKfycbwbQdFc9lSKC-Jrmda7m5vwcA-JX0LeyVVx-CzLdsy52mhgejI/exec?id=' + $vm.$route.params.id
     this.axios
       .get(url, { crossDomain: true })
@@ -354,7 +361,6 @@ export default {
         $vm.$refs['modal-start'].show()
       })
       .catch(err => {
-        // $vm.$refs['loading-modal'].hide()
         alert('通信エラーが発生しました。')
         console.log('err:', err)
       })
