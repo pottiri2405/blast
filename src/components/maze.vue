@@ -21,13 +21,14 @@
       <b-row class="mt-2">
         <b-col>
           <table>
-            <tr v-for="(cols, y) in data.map" :key="'row-' + y">
+            <tr v-for="(chars, y) in data.map" :key="'row-' + y">
               <td border
-              v-for="(col, x) in cols"
+              v-for="(char, x) in chars"
               :key="'col-' + y + '-' + x"
               v-touch:start="clickBox(x, y)"
               class="box"
               v-bind:class="{
+                'even-box' : ((parseInt(y) - 1) * data.size + parseInt(x)) % 2 === 0,
                 'box-large': (data.size < 10),
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
@@ -35,7 +36,7 @@
                 'clicked-box': isClickedBox(x, y)
                 }">
                 <b-icon icon="star-fill" variant="warning" scale="1.25" animation="throb" v-if="isCurrentStar(x, y)"></b-icon>
-                <span v-if="!isCurrentStar(x, y) && !isGoal(x, y)">{{ col }}</span>
+                <span v-if="!isCurrentStar(x, y) && !isGoal(x, y)">{{ char }}</span>
                 <b-icon icon="flag-fill" variant="danger" scale="1.25" v-if="!isCurrentStar(x, y) && isGoal(x, y)"></b-icon>
               </td>
             </tr>
@@ -200,7 +201,8 @@ export default {
         current = this.star.pioneered[this.star.current] ? this.star.pioneered[this.star.current] : null
         next = null
         let xy = this.star.current.split('-')
-        let index = null
+        let before = null
+        let priority = 0
         for (let d of DIRECTIONS) {
           let mx = parseInt(xy[0]) + d.fx
           let my = parseInt(xy[1]) + d.fy
@@ -214,8 +216,13 @@ export default {
             continue
           }
           // 一番古い道優先
-          if (index === null || this.star.pioneered[mkey].index < index) {
-            index = this.star.pioneered[mkey].index
+          // 逆方向は優先度を下げる
+          priority = this.star.pioneered[mkey].index
+          if (this.star.pioneered[mkey].axis !== d.axis) {
+            priority += 3
+          }
+          if (before === null || priority < before) {
+            before = priority
             next = mkey
           }
         }
@@ -385,9 +392,11 @@ export default {
   border-left: 1px solid #000000;
   padding-left: 0px !important;
   padding-right: 0px !important;
-  background-color: #fffaf0;
   color: #000000;
   padding: 0px;
+}
+.even-box {
+  background-color: #eeeeee;
 }
 .box-large {
   font-size: x-large;
