@@ -161,7 +161,7 @@ export default {
             await $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
             delete $vm.bomb[key]
           }
-          await $vm.sleep(1000)
+          await $vm.sleep(3000)
           if ($vm.data.installations['black-bomb'] <= 0 && $vm.data.installations.breakable1 <= 0) {
             $vm.$refs['modal-complete'].show()
           } else {
