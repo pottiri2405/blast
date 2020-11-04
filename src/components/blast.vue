@@ -25,7 +25,7 @@
         </b-col>
       </b-row>
       <b-row class="mt-2">
-        <b-col>
+        <b-col class="pl-0">
           <table>
             <tr v-for="(chars, y) in data.map" :key="'row-' + y">
               <td border
