@@ -15,7 +15,7 @@
       "complete_message": "全問正解！",
       "goal_message": "GOAL!",
       "success_message": "クリア！",
-      "failure_message": "惜しい・・・",
+      "failure_message": "残念・・・",
       "time": "タイム：",
       "thank_you": "プレイしていただきありがとうございました！",
       "how_to_play": "遊び方",
