@@ -13,7 +13,7 @@ Vue.use(VueAxios, axios) // add by POTTIRI
 const messages = require('./i18n.json') // add by POTTIRI
 Vue.use(VueI18n)
 const i18n = new VueI18n({
-  locale: 'ja',
+  locale: 'en',
   messages: messages
 })
 Vue.mixin(gv) // add by POTTIRI

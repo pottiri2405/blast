@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue' // added
 import Router from 'vue-router'
-import stage from '@/components/stage' // added
+import blast from '@/components/blast' // added
 import maze from '@/components/maze' // added
+import stage from '@/components/stage' // added
+import quiz from '@/components/quiz' // added
 import thumbnail from '@/components/thumbnail' // added
 import Vue2TouchEvents from 'vue2-touch-events' // added
 import 'bootstrap/dist/css/bootstrap.css' // added
@@ -18,14 +20,24 @@ Vue.use(Vue2TouchEvents, { // added
 export default new Router({
   routes: [
     {
-      path: '/stage/:id/:language',
-      name: 'stage',
-      component: stage
+      path: '/blast/:id/:language',
+      name: 'blast',
+      component: blast
     },
     {
       path: '/maze/:id/:language',
       name: 'maze',
       component: maze
+    },
+    {
+      path: '/stage/:id/:language',
+      name: 'stage',
+      component: stage
+    },
+    {
+      path: '/quiz/:id/:language',
+      name: 'quiz',
+      component: quiz
     },
     {
       path: '/thumbnail/:id/:language',

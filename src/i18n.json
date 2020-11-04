@@ -5,17 +5,22 @@
       "start": "スタート！",
       "hint": "ヒント",
       "restart": "リスタート",
+      "retry": "もう一度同じ問題をやる",
+      "question": "問題",
+      "correct": "正解！",
       "thumbnail_size": "{size}✕{size}マス",
       "thumbnail_word_count": "ワード数：{count}",
       "google_search": "Google 画像検索",
       "checked_clear": "選択クリア",
       "complete_message": "全問正解！",
       "goal_message": "GOAL!",
+      "success_message": "成功！",
       "failure_message": "失敗・・・",
       "time": "タイム：",
       "thank_you": "プレイしていただきありがとうございました！",
       "how_to_play": "遊び方",
-      "google_search_result": "Google画像検索"
+      "google_search_result": "Google画像検索",
+      "blast_start_text": "<img src=\"/static/bomb/red-bomb.svg\" class=\"img-small\">を設置して<img src=\"/static/bomb/black-bomb.svg\" class=\"img-small\">と<img src=\"/static/bomb/breakable1.svg\" class=\"img-small\">を全て爆破してください。<br><img src=\"/static/bomb/unbreakable.svg\" class=\"img-small\">は爆破できません。"
     }
   },
   "en": {
@@ -24,18 +29,23 @@
       "start": "Start",
       "hint": "Hint",
       "restart": "Restart",
+      "retry": "Retry",
+      "question": "Question",
+      "correct": "Correct!",
       "thumbnail_size": "Size:{size}✕{size}",
       "thumbnail_word_count": "Word count:{count}",
       "google_search": "Google image search",
       "checked_clear": "Clear",
       "complete_message": "COMPLETE!",
       "goal_message": "GOAL!",
+      "success_message": "SUCCESS!",
       "failure_message": "FAILURE...",
       "time": "Time:",
       "thank_you": "Thank you for playing!",
       "how_to_play": "How to play",
       "google_search_result": "Google Image Search",
-      "next_word_hint": "<Next word hint>"
+      "next_word_hint": "<Next word hint>",
+      "blast_start_text": "<img src=\"/static/bomb/red-bomb.svg\" class=\"img-small\">を設置して<img src=\"/static/bomb/black-bomb.svg\" class=\"img-small\">と<img src=\"/static/bomb/breakable1.svg\" class=\"img-small\">を全て爆破してください。<br><img src=\"/static/bomb/unbreakable.svg\" class=\"img-small\">は爆破できません。"
     }
   }
 }

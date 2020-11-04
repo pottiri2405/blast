@@ -1,0 +1,386 @@
+<template>
+  <div id="stage">
+    <b-spinner v-show="init===true" id="init-loading" label="Large Spinner"></b-spinner>
+    <b-container v-show="init===false">
+      <b-row class="mt-2">
+        <b-col>
+          <!-- <b-button pill size="sm" variant="info" v-touch="clear">
+            {{ $t("message.checked_clear") }}
+          </b-button> -->
+          <b-button pill size="sm" variant="warning" v-touch="restart">
+            {{ $t("message.restart") }}
+          </b-button>
+        </b-col>
+      </b-row>
+      <b-row class="mt-2">
+        <b-col>
+          <table>
+            <tr>
+              <td v-for="n in life.remaining" v-bind:key="'life-remaining-' + n" class="remaining red-bomb">
+                &nbsp;
+              </td>
+              <td class="remaining"></td>
+            </tr>
+          </table>
+        </b-col>
+      </b-row>
+      <b-row class="mt-2">
+        <b-col>
+          <table>
+            <tr v-for="(chars, y) in data.map" :key="'row-' + y">
+              <td border
+              v-for="(char, x) in chars"
+              :key="'col-' + y + '-' + x"
+              v-touch:start="setRedBomb(x, y)"
+              class="box"
+              v-bind:class="{
+                'box-large': (data.size < 10),
+                'box-row-last': isLast(y, data.size),
+                'box-col-last': isLast(x, data.size),
+                'red-bomb': isRedBomb(x, y),
+                'black-bomb': isBlackBomb(x, y),
+                'unbreakable': isUnbreakable(x, y),
+                'breakable1': isBreakable1(x, y),
+                'explosion': isExplosion(x, y)
+                }">
+                &nbsp;
+              </td>
+            </tr>
+          </table>
+        </b-col>
+      </b-row>
+    </b-container>
+    <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop class="middle">
+      <p v-html="$t('message.blast_start_text')"></p>
+      <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
+    </b-modal>
+    <b-modal ref="modal-count-down" size="sm" hide-header hide-footer no-close-on-esc no-close-on-backdrop class="middle">
+      <h2 class="text-center">{{ countDown }}</h2>
+    </b-modal>
+    <b-modal ref="modal-complete" size="md" hide-header hide-footer clas="middle">
+      <b-container>
+        <b-row>
+          <b-col class="text-center align-middle">
+            <h3>{{ $t("message.success_message") }}</h3>
+            <p>
+              <b-icon icon="stopwatch" font-scale="2"></b-icon>
+              <span id="timer" class="bg-dark text-light pl-2 pr-2">
+                {{ timer.time }}
+              </span>
+            </p>
+            <p>{{ $t("message.thank_you") }}</p>
+            <b-button pill size="sm" variant="warning" v-touch="restart">
+              {{ $t("message.restart") }}
+            </b-button>
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-modal>
+    <b-modal ref="modal-failure" size="md" hide-header hide-footer clas="middle">
+      <b-container>
+        <b-row>
+          <b-col class="text-center align-middle">
+            <h3>
+              {{ $t("message.failure_message") }}
+              <b-icon icon="arrow90deg-right" rotate="90"></b-icon>
+            </h3>
+            <p>{{ $t("message.thank_you") }}</p>
+            <b-button pill size="sm" variant="warning" v-touch="restart">
+              {{ $t("message.restart") }}
+            </b-button>
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-modal>
+  </div>
+</template>
+
+<script>
+const DIRECTIONS = [
+  {axis: 'w', rx: 1, ry: 0, fx: -1, fy: 0},
+  {axis: 'sw', rx: 1, ry: -1, fx: -1, fy: 1},
+  {axis: 's', rx: 0, ry: -1, fx: 0, fy: 1},
+  {axis: 'se', rx: -1, ry: -1, fx: 1, fy: 1},
+  {axis: 'e', rx: -1, ry: 0, fx: 1, fy: 0},
+  {axis: 'ne', rx: -1, ry: 1, fx: 1, fy: -1},
+  {axis: 'ne', rx: 0, ry: 1, fx: 0, fy: -1},
+  {axis: 'nw', rx: 1, ry: 1, fx: -1, fy: -1}
+]
+export default {
+  data () {
+    return {
+      init: true,
+      timer: {time: '00:00:00.000', began: null, stopped: null, duration: 0, started: null, running: false},
+      data: {map: {}},
+      life: {remaining: 0, max: 100},
+      bomb: {},
+      explosion: {},
+      countDown: 3
+    }
+  },
+  methods: {
+    clear () {
+      this.bomb.length = 0
+      this.life.remaining = this.life.max
+    },
+    setRedBomb (x, y) {
+      let $vm = this
+      return async function (event) {
+        // 空白以外なら爆弾設置不可
+        if ($vm.data.map[y][x] !== 'none') return
+
+        let key = $vm.getKey(x, y)
+        if ($vm.bomb[key]) {
+          delete $vm.bomb[key]
+          $vm.life.remaining++
+          return
+        }
+        $vm.bomb[key] = {x: x, y: y}
+        $vm.life.remaining--
+        if ($vm.life.remaining === 0) {
+          $vm.$refs['modal-count-down'].show()
+          await $vm.sleep(1000)
+          $vm.countDown--
+          await $vm.sleep(1000)
+          $vm.countDown--
+          await $vm.sleep(1000)
+          $vm.countDown--
+          $vm.$refs['modal-count-down'].hide()
+          Object.keys($vm.bomb)
+          for (let k of Object.keys($vm.bomb)) {
+            $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
+            delete $vm.bomb[key]
+          }
+          $vm.timerStop()
+          await $vm.sleep(3000)
+          $vm.explosion = {}
+          if ($vm.data.installations['black-bomb'] === 0 && $vm.data.installations.breakable1 === 0) {
+            $vm.$refs['modal-complete'].show()
+          } else {
+            $vm.$refs['modal-failure'].show()
+          }
+        }
+      }
+    },
+    fire (x, y) {
+      this.setExplosion(x, y)
+      for (let d of DIRECTIONS) {
+        let mx = parseInt(x)
+        let my = parseInt(y)
+        while (1) {
+          mx += d.fx
+          my += d.fy
+          if (my < 1 || my > Object.keys(this.data.map).length) break
+          if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
+          if (this.data.map[my][mx] === 'unbreakable') break
+          if (this.data.map[my][mx] === 'breakable1') {
+            this.setExplosion(mx, my)
+            this.data.installations.breakable1--
+            break
+          }
+          if (this.data.map[my][mx] === 'black-bomb') {
+            this.fire(mx, my)
+            this.setExplosion(mx, my)
+            this.data.installations['black-bomb']--
+            continue
+          }
+          this.setExplosion(mx, my)
+        }
+      }
+    },
+    isRedBomb (x, y) {
+      return Object.keys(this.bomb).includes(this.getKey(x, y))
+    },
+    isBlackBomb (x, y) {
+      return (this.data.map[y][x] === 'black-bomb')
+    },
+    isUnbreakable (x, y) {
+      return (this.data.map[y][x] === 'unbreakable')
+    },
+    isBreakable1 (x, y) {
+      return (this.data.map[y][x] === 'breakable1')
+    },
+    setExplosion (x, y) {
+      this.data.map[y][x] = 'none'
+      const key = this.getKey(x, y)
+      if (Object.keys(this.explosion).includes(key)) {
+        this.explosion[key].count++
+      } else {
+        this.explosion[key] = {count: 1}
+      }
+    },
+    isExplosion (x, y) {
+      return Object.keys(this.explosion).includes(this.getKey(x, y))
+    },
+    explosionCount (x, y) {
+      if (!Object.keys(this.explosion).includes(this.getKey(x, y)) || this.explosion[this.getKey(x, y)].count === 1) return '　'
+      return this.explosion[this.getKey(x, y)].count
+    },
+    gameStart () {
+      this.$refs['modal-start'].hide()
+      this.timerStart()
+    },
+    timerStart () {
+      if (this.timer.running !== false) return
+      if (this.timer.began === null) {
+        this.timerReset()
+        this.timer.began = new Date()
+      }
+      if (this.timer.stopped !== null) {
+        this.timer.duration += (new Date() - this.timer.stopped)
+      }
+      this.timer.started = setInterval(this.timerClockRunning, 10)
+      this.timer.running = true
+    },
+    timerStop () {
+      this.timer.running = false
+      this.timer.stopped = new Date()
+      clearInterval(this.timer.started)
+    },
+    timerReset () {
+      this.timerStart = false
+      clearInterval(this.timer.started)
+      this.timer.duration = 0
+      this.timer.began = null
+      this.timer.stopped = null
+      this.timer.time = '00:00:00.000'
+    },
+    timerClockRunning () {
+      let currentTime = new Date()
+      let timeElapsed = new Date(currentTime - this.timer.began - this.timer.duration)
+      let hour = timeElapsed.getUTCHours()
+      let min = timeElapsed.getUTCMinutes()
+      let sec = timeElapsed.getUTCSeconds()
+      let ms = timeElapsed.getUTCMilliseconds()
+      this.timer.time =
+        this.zeroPrefix(hour, 2) + ':' +
+        this.zeroPrefix(min, 2) + ':' +
+        this.zeroPrefix(sec, 2) + '.' +
+        this.zeroPrefix(ms, 3)
+    },
+    restart () {
+      this.$router.go({path: this.$router.currentRoute.path, force: true})
+    }
+  },
+  mounted () {
+    let $vm = this
+    $vm.logging(process.env)
+    $vm.$i18n.locale = $vm.$route.params.language
+    let url = 'https://script.google.com/macros/s/AKfycbwaWEA2ZQcqYlc9Vqfc0fgacOwM_8pGoqP5O9sL_tM2j-RkDEY/exec?id=' + $vm.$route.params.id
+    this.axios
+      .get(url, { crossDomain: true })
+      .then(response => {
+        $vm.logging(response)
+        $vm.data = response.data
+        $vm.life.remaining = $vm.data.limit
+        $vm.life.max = $vm.data.limit
+        $vm.init = false
+        $vm.$refs['modal-start'].show()
+      })
+      .catch(err => {
+        alert('通信エラーが発生しました。')
+        console.log('err:', err)
+      })
+  }
+}
+</script>
+<style>
+#init-loading {
+  font-size: xx-large;
+  position: fixed;
+  height: 50px;
+  width: 50px;
+  top: 50px;
+  left:calc(50% - 50px/2);
+}
+.remaining {
+  min-width: 2rem !important;
+  min-height: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0px;
+}
+.box {
+  cursor: pointer;
+  min-width: 2rem !important;
+  min-height: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  border-top: 1px solid #000000;
+  border-left: 1px solid #000000;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  color: #000000;
+  padding: 0px;
+}
+.red-bomb {
+  background-image: url("/static/bomb/red-bomb.svg");
+  background-size: cover;
+}
+.black-bomb {
+  background-image: url("/static/bomb/black-bomb.svg");
+  background-size: cover;
+}
+.unbreakable {
+  background-image: url("/static/bomb/unbreakable.svg");
+  background-size: cover;
+}
+.breakable1 {
+  background-image: url("/static/bomb/breakable1.svg");
+  background-size: cover;
+}
+.explosion {
+  background-image: url("/static/bomb/explosion.svg");
+  background-size: cover;
+  animation: hurueru .1s  infinite;
+}
+.box-large {
+  font-size: x-large;
+  min-width: 2.5rem !important;
+  min-height: 2.5rem !important;
+  max-width: 2.5rem !important;
+  max-height: 2.5rem !important;
+}
+.box-row-last {
+  border-bottom: 1px solid #000000;
+}
+.box-col-last {
+  border-right: 1px solid #000000;
+}
+@-webkit-keyframes flash {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+@keyframes flash {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+#timer {
+  font-family: 'Share Tech Mono', sans-serif;
+  font-size: x-large;
+  max-width: 12rem !important;
+  width: 12rem !important;
+  padding: 0px;
+  padding-top: 0.25rem;
+  /* border-radius: 50rem; */
+}
+.modal.middle {
+  top: 25% !important;
+}
+.buruburu {
+    animation: hurueru .1s  infinite;
+}
+@keyframes hurueru {
+    0% {transform: translate(0px, 0px) rotateZ(0deg)}
+    25% {transform: translate(2px, 2px) rotateZ(1deg)}
+    50% {transform: translate(0px, 2px) rotateZ(0deg)}
+    75% {transform: translate(2px, 0px) rotateZ(-1deg)}
+    100% {transform: translate(0px, 0px) rotateZ(0deg)}
+}
+.img-small {
+  height: 2rem;
+  width: 2rem;
+}
+</style>
