@@ -37,11 +37,13 @@
                 'box-large': (data.size < 10),
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
-                'red-bomb': isRedBomb(x, y),
+                'red-bomb': (isRedBomb(x, y) && countDown > 0),
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
                 'breakable1': isBreakable1(x, y),
-                'explosion': isExplosion(x, y)
+                'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
+                'explosion-bomb': isExplosionBomb(x, y),
+                'buruburu': isBuruBuru(x, y)
                 }">
                 &nbsp;
               </td>
@@ -121,6 +123,7 @@ export default {
       life: {remaining: 0, max: 100},
       bomb: {},
       explosion: {},
+      buruburu: {},
       countDown: 3
     }
   },
@@ -144,6 +147,7 @@ export default {
         $vm.bomb[key] = {x: x, y: y}
         $vm.life.remaining--
         if ($vm.life.remaining === 0) {
+          $vm.timerStop()
           $vm.$refs['modal-count-down'].show()
           await $vm.sleep(1000)
           $vm.countDown--
@@ -154,12 +158,10 @@ export default {
           $vm.$refs['modal-count-down'].hide()
           Object.keys($vm.bomb)
           for (let k of Object.keys($vm.bomb)) {
-            $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
+            await $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
             delete $vm.bomb[key]
           }
-          $vm.timerStop()
-          await $vm.sleep(3000)
-          $vm.explosion = {}
+          await $vm.sleep(1000)
           if ($vm.data.installations['black-bomb'] === 0 && $vm.data.installations.breakable1 === 0) {
             $vm.$refs['modal-complete'].show()
           } else {
@@ -168,8 +170,9 @@ export default {
         }
       }
     },
-    fire (x, y) {
-      this.setExplosion(x, y)
+    async fire (x, y) {
+      this.setExplosion(x, y, true)
+      let blackBombs = []
       for (let d of DIRECTIONS) {
         let mx = parseInt(x)
         let my = parseInt(y)
@@ -180,18 +183,24 @@ export default {
           if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
           if (this.data.map[my][mx] === 'unbreakable') break
           if (this.data.map[my][mx] === 'breakable1') {
-            this.setExplosion(mx, my)
+            this.setExplosion(mx, my, false)
             this.data.installations.breakable1--
             break
           }
           if (this.data.map[my][mx] === 'black-bomb') {
-            this.fire(mx, my)
-            this.setExplosion(mx, my)
+            blackBombs.push({x: mx, y: my})
+            this.setBuruBuru(mx, my)
             this.data.installations['black-bomb']--
             continue
           }
-          this.setExplosion(mx, my)
+          this.setExplosion(mx, my, false)
         }
+      }
+      await this.sleep(250)
+      this.explosion = {}
+      this.buruburu = {}
+      for (let b of blackBombs) {
+        await this.fire(b.x, b.y)
       }
     },
     isRedBomb (x, y) {
@@ -206,17 +215,27 @@ export default {
     isBreakable1 (x, y) {
       return (this.data.map[y][x] === 'breakable1')
     },
-    setExplosion (x, y) {
+    setExplosion (x, y, bomb) {
       this.data.map[y][x] = 'none'
       const key = this.getKey(x, y)
       if (Object.keys(this.explosion).includes(key)) {
         this.explosion[key].count++
       } else {
-        this.explosion[key] = {count: 1}
+        this.explosion[key] = {count: 1, bomb: bomb}
       }
+    },
+    setBuruBuru (x, y) {
+      const key = this.getKey(x, y)
+      this.buruburu[key] = key
     },
     isExplosion (x, y) {
       return Object.keys(this.explosion).includes(this.getKey(x, y))
+    },
+    isExplosionBomb (x, y) {
+      return (this.isExplosion(x, y) && this.explosion[this.getKey(x, y)].bomb === true)
+    },
+    isBuruBuru (x, y) {
+      return Object.keys(this.buruburu).includes(this.getKey(x, y))
     },
     explosionCount (x, y) {
       if (!Object.keys(this.explosion).includes(this.getKey(x, y)) || this.explosion[this.getKey(x, y)].count === 1) return '　'
@@ -352,6 +371,11 @@ export default {
   background-size: cover;
   animation: hurueru .1s  infinite;
 }
+.explosion-bomb {
+  background-image: url("/static/bomb/explosion-start.svg");
+  background-size: cover;
+  animation: hurueru .1s  infinite;
+}
 .box-large {
   font-size: x-large;
   min-width: 2.5rem !important;
@@ -386,14 +410,14 @@ export default {
   top: 25% !important;
 }
 .buruburu {
-    animation: hurueru .1s  infinite;
+  animation: hurueru .1s  infinite;
 }
 @keyframes hurueru {
-    0% {transform: translate(0px, 0px) rotateZ(0deg)}
-    25% {transform: translate(2px, 2px) rotateZ(1deg)}
-    50% {transform: translate(0px, 2px) rotateZ(0deg)}
-    75% {transform: translate(2px, 0px) rotateZ(-1deg)}
-    100% {transform: translate(0px, 0px) rotateZ(0deg)}
+  0% {transform: translate(0px, 0px) rotateZ(0deg)}
+  25% {transform: translate(2px, 2px) rotateZ(1deg)}
+  50% {transform: translate(0px, 2px) rotateZ(0deg)}
+  75% {transform: translate(2px, 0px) rotateZ(-1deg)}
+  100% {transform: translate(0px, 0px) rotateZ(0deg)}
 }
 .img-small {
   height: 2rem;
