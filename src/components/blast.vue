@@ -218,13 +218,13 @@ export default {
       return (this.data.map[y][x] === 'breakable1')
     },
     setExplosion (x, y, bomb) {
-      this.data.map[y][x] = 'none'
       const key = this.getKey(x, y)
       if (Object.keys(this.explosion).includes(key)) {
         this.explosion[key].count++
       } else {
         this.explosion[key] = {count: 1, bomb: bomb}
       }
+      this.data.map[y][x] = 'none'
     },
     setBuruBuru (x, y) {
       const key = this.getKey(x, y)
