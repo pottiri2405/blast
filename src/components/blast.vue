@@ -198,7 +198,7 @@ export default {
         }
       }
       await this.sleep(250)
-      this.explosion = {}
+      //this.explosion = {}
       this.buruburu = {}
       for (let k of blackBombs) {
         let xy = k.split('-')
