@@ -71,12 +71,16 @@
               </span>
             </p>
             <p>{{ $t("message.thank_you") }}</p>
-            <b-button v-if="data['prevent1']" pill size="sm" variant="info" v-touch="prevent">
-              {{ $t("message.to_prevent_stage") }}
-            </b-button>
-            <b-button v-if="data['next1']" pill size="sm" variant="info" v-touch="next">
-              {{ $t("message.to_next_stage") }}
-            </b-button>
+            <a v-if="data['prevent1']" :href="preventLink()">
+              <b-button pill size="sm" variant="info">
+                {{ $t("message.to_prevent_stage") }}
+              </b-button>
+            </a>
+            <a v-if="data['next1']" :href="nextLink()">
+              <b-button pill size="sm" variant="info">
+                {{ $t("message.to_next_stage") }}
+              </b-button>
+            </a>
             <b-button pill size="sm" variant="warning" v-touch="restart">
               {{ $t("message.restart") }}
             </b-button>
@@ -285,14 +289,18 @@ export default {
         this.zeroPrefix(sec, 2) + '.' +
         this.zeroPrefix(ms, 3)
     },
-    prevent () {
+    preventLink () {
       if (this.$route.params.language === 'ja') {
-        location.href = 'https://blast.pottiri.tech/posts/' + this.data.prevent1
+        return 'https://blast.pottiri.tech/posts/' + this.data.prevent1
+      } else if (this.$route.params.language === 'en') {
+        return ''
       }
     },
-    next () {
+    nextLink () {
       if (this.$route.params.language === 'ja') {
-        location.href = 'https://blast.pottiri.tech/posts/' + this.data.next1
+        return 'https://blast.pottiri.tech/posts/' + this.data.next1
+      } else if (this.$route.params.language === 'en') {
+        return ''
       }
     },
     restart () {
