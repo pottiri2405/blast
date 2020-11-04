@@ -409,7 +409,7 @@ export default {
   /* border-radius: 50rem; */
 }
 .modal.middle {
-  top: 25% !important;
+  top: 50% !important;
 }
 .buruburu {
   animation: hurueru .1s  infinite;
