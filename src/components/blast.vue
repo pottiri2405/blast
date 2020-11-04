@@ -157,7 +157,6 @@ export default {
           $vm.countDown--
           $vm.$refs['modal-count-down'].hide()
           await $vm.sleep(250)
-          Object.keys($vm.bomb)
           for (let k of Object.keys($vm.bomb)) {
             await $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
             delete $vm.bomb[key]
