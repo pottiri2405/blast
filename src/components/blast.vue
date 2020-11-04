@@ -71,16 +71,12 @@
               </span>
             </p>
             <p>{{ $t("message.thank_you") }}</p>
-            <a v-if="data['prevent1']" :href="preventLink()">
-              <b-button pill size="sm" variant="info">
-                {{ $t("message.to_prevent_stage") }}
-              </b-button>
-            </a>
-            <a v-if="data['next1']" :href="nextLink()">
-              <b-button pill size="sm" variant="info">
-                {{ $t("message.to_next_stage") }}
-              </b-button>
-            </a>
+            <b-button v-if="data['prevent1']" pill size="sm" variant="info" v-touch="prevent">
+              {{ $t("message.to_prevent_stage") }}
+            </b-button>
+            <b-button v-if="data['next1']" pill size="sm" variant="info" v-touch="next">
+              {{ $t("message.to_next_stage") }}
+            </b-button>
             <b-button pill size="sm" variant="warning" v-touch="restart">
               {{ $t("message.restart") }}
             </b-button>
@@ -289,18 +285,14 @@ export default {
         this.zeroPrefix(sec, 2) + '.' +
         this.zeroPrefix(ms, 3)
     },
-    preventLink () {
+    prevent () {
       if (this.$route.params.language === 'ja') {
-        return 'https://blast.pottiri.tech/posts/' + this.data.prevent1
-      } else if (this.$route.params.language === 'en') {
-        return ''
+        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.data.prevent1
       }
     },
-    nextLink () {
+    next () {
       if (this.$route.params.language === 'ja') {
-        return 'https://blast.pottiri.tech/posts/' + this.data.next1
-      } else if (this.$route.params.language === 'en') {
-        return ''
+        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.data.next1
       }
     },
     restart () {
@@ -339,18 +331,18 @@ export default {
   left:calc(50% - 50px/2);
 }
 .remaining {
-  min-width: 2rem !important;
-  min-height: 2rem !important;
-  width: 2rem !important;
-  height: 2rem !important;
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
   padding: 0px;
 }
 .box {
   cursor: pointer;
-  min-width: 2rem !important;
-  min-height: 2rem !important;
-  width: 2rem !important;
-  height: 2rem !important;
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
   text-align: center !important;
   vertical-align: middle !important;
   border-top: 1px solid #000000;
@@ -410,8 +402,8 @@ export default {
 #timer {
   font-family: 'Share Tech Mono', sans-serif;
   font-size: x-large;
-  max-width: 12rem !important;
-  width: 12rem !important;
+  max-width: 11.75rem !important;
+  width: 11.75rem !important;
   padding: 0px;
   padding-top: 0.25rem;
   /* border-radius: 50rem; */
