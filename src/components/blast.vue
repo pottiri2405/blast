@@ -162,7 +162,7 @@ export default {
             delete $vm.bomb[key]
           }
           await $vm.sleep(1000)
-          if ($vm.data.installations['black-bomb'] === 0 && $vm.data.installations.breakable1 === 0) {
+          if ($vm.data.installations['black-bomb'] <= 0 && $vm.data.installations.breakable1 <= 0) {
             $vm.$refs['modal-complete'].show()
           } else {
             $vm.$refs['modal-failure'].show()
@@ -179,6 +179,7 @@ export default {
         while (1) {
           mx += d.fx
           my += d.fy
+          let mkey = this.getKey(mx, my)
           if (my < 1 || my > Object.keys(this.data.map).length) break
           if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
           if (this.data.map[my][mx] === 'unbreakable') break
@@ -188,7 +189,7 @@ export default {
             break
           }
           if (this.data.map[my][mx] === 'black-bomb') {
-            blackBombs.push({x: mx, y: my})
+            if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
             this.setBuruBuru(mx, my)
             this.data.installations['black-bomb']--
             continue
@@ -199,8 +200,9 @@ export default {
       await this.sleep(250)
       this.explosion = {}
       this.buruburu = {}
-      for (let b of blackBombs) {
-        await this.fire(b.x, b.y)
+      for (let k of blackBombs) {
+        let xy = k.split('-')
+        await this.fire(xy[0], xy[1])
       }
     },
     isRedBomb (x, y) {
