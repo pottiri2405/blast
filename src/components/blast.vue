@@ -209,13 +209,13 @@ export default {
       return Object.keys(this.bomb).includes(this.getKey(x, y))
     },
     isBlackBomb (x, y) {
-      return (this.data.map[y][x] === 'black-bomb' && !this.isExplosion (x, y))
+      return (this.data.map[y][x] === 'black-bomb' && !this.isExplosion(x, y))
     },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
     },
     isBreakable1 (x, y) {
-      return (this.data.map[y][x] === 'breakable1' && !this.isExplosion (x, y))
+      return (this.data.map[y][x] === 'breakable1' && !this.isExplosion(x, y))
     },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
