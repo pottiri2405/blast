@@ -37,13 +37,13 @@
                 'box-large': (data.size < 10),
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
+                'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
+                'explosion-bomb': isExplosionBomb(x, y),
+                'buruburu': isBuruBuru(x, y)
                 'red-bomb': (isRedBomb(x, y) && countDown > 0),
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
                 'breakable1': isBreakable1(x, y),
-                'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
-                'explosion-bomb': isExplosionBomb(x, y),
-                'buruburu': isBuruBuru(x, y)
                 }">
                 &nbsp;
               </td>
