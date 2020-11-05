@@ -37,13 +37,13 @@
                 'box-large': (data.size < 10),
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
+                'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
+                'explosion-bomb': isExplosionBomb(x, y),
+                'buruburu': isBuruBuru(x, y),
                 'red-bomb': (isRedBomb(x, y) && countDown > 0),
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
-                'breakable1': isBreakable1(x, y),
-                'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
-                'explosion-bomb': isExplosionBomb(x, y),
-                'buruburu': isBuruBuru(x, y)
+                'breakable1': isBreakable1(x, y)
                 }">
                 &nbsp;
               </td>
@@ -156,12 +156,12 @@ export default {
           await $vm.sleep(1000)
           $vm.countDown--
           $vm.$refs['modal-count-down'].hide()
-          Object.keys($vm.bomb)
+          await $vm.sleep(250)
           for (let k of Object.keys($vm.bomb)) {
             await $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
             delete $vm.bomb[key]
           }
-          await $vm.sleep(1000)
+          await $vm.sleep(3000)
           if ($vm.data.installations['black-bomb'] <= 0 && $vm.data.installations.breakable1 <= 0) {
             $vm.$refs['modal-complete'].show()
           } else {
@@ -182,13 +182,13 @@ export default {
           let mkey = this.getKey(mx, my)
           if (my < 1 || my > Object.keys(this.data.map).length) break
           if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
-          if (this.data.map[my][mx] === 'unbreakable') break
-          if (this.data.map[my][mx] === 'breakable1') {
+          if (this.isUnbreakable(mx, my)) break
+          if (this.isBreakable1(mx, my)) {
             this.setExplosion(mx, my, false)
             this.data.installations.breakable1--
             break
           }
-          if (this.data.map[my][mx] === 'black-bomb') {
+          if (this.isBlackBomb(mx, my)) {
             if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
             this.setBuruBuru(mx, my)
             this.data.installations['black-bomb']--
@@ -197,8 +197,8 @@ export default {
           this.setExplosion(mx, my, false)
         }
       }
-      await this.sleep(250)
-      this.explosion = {}
+      //await this.sleep(100)
+      //this.explosion = {}
       this.buruburu = {}
       for (let k of blackBombs) {
         let xy = k.split('-')
@@ -209,22 +209,22 @@ export default {
       return Object.keys(this.bomb).includes(this.getKey(x, y))
     },
     isBlackBomb (x, y) {
-      return (this.data.map[y][x] === 'black-bomb')
+      return (this.data.map[y][x] === 'black-bomb' && !this.isExplosion(x, y))
     },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
     },
     isBreakable1 (x, y) {
-      return (this.data.map[y][x] === 'breakable1')
+      return (this.data.map[y][x] === 'breakable1' && !this.isExplosion(x, y))
     },
     setExplosion (x, y, bomb) {
-      this.data.map[y][x] = 'none'
       const key = this.getKey(x, y)
       if (Object.keys(this.explosion).includes(key)) {
         this.explosion[key].count++
       } else {
         this.explosion[key] = {count: 1, bomb: bomb}
       }
+      //this.data.map[y][x] = 'none'
     },
     setBuruBuru (x, y) {
       const key = this.getKey(x, y)
