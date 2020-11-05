@@ -384,7 +384,7 @@ export default {
 .explosion {
   background-image: url("/static/bomb/explosion.svg");
   background-size: cover;
-  animation: hurueru .1s  infinite;
+  //animation: hurueru .1s  infinite;
 }
 .explosion-bomb {
   background-image: url("/static/bomb/explosion-start.svg");
