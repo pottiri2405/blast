@@ -197,9 +197,9 @@ export default {
           this.setExplosion(mx, my, false)
         }
       }
-      await this.sleep(250)
+      //await this.sleep(250)
       //this.explosion = {}
-      this.buruburu = {}
+      //this.buruburu = {}
       for (let k of blackBombs) {
         let xy = k.split('-')
         await this.fire(xy[0], xy[1])
