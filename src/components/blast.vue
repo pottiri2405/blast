@@ -182,13 +182,13 @@ export default {
           let mkey = this.getKey(mx, my)
           if (my < 1 || my > Object.keys(this.data.map).length) break
           if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
-          if (this.data.map[my][mx] === 'unbreakable') break
-          if (this.isBreakable1(x, y)) {
+          if (this.isUnbreakable(mx, my)) break
+          if (this.isBreakable1(mx, my)) {
             this.setExplosion(mx, my, false)
             this.data.installations.breakable1--
             break
           }
-          if (this.isBlackBomb(x, y)) {
+          if (this.isBlackBomb(mx, my)) {
             if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
             this.setBuruBuru(mx, my)
             this.data.installations['black-bomb']--
