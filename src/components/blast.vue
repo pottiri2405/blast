@@ -183,12 +183,12 @@ export default {
           if (my < 1 || my > Object.keys(this.data.map).length) break
           if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
           if (this.data.map[my][mx] === 'unbreakable') break
-          if (this.data.map[my][mx] === 'breakable1') {
+          if (this.isBreakable1(x, y)) {
             this.setExplosion(mx, my, false)
             this.data.installations.breakable1--
             break
           }
-          if (this.data.map[my][mx] === 'black-bomb') {
+          if (this.isBlackBomb(x, y)) {
             if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
             this.setBuruBuru(mx, my)
             this.data.installations['black-bomb']--
@@ -209,13 +209,13 @@ export default {
       return Object.keys(this.bomb).includes(this.getKey(x, y))
     },
     isBlackBomb (x, y) {
-      return (this.data.map[y][x] === 'black-bomb')
+      return (this.data.map[y][x] === 'black-bomb' && !this.isExplosion (x, y))
     },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
     },
     isBreakable1 (x, y) {
-      return (this.data.map[y][x] === 'breakable1')
+      return (this.data.map[y][x] === 'breakable1' && !this.isExplosion (x, y))
     },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
@@ -224,7 +224,7 @@ export default {
       } else {
         this.explosion[key] = {count: 1, bomb: bomb}
       }
-      this.data.map[y][x] = 'none'
+      //this.data.map[y][x] = 'none'
     },
     setBuruBuru (x, y) {
       const key = this.getKey(x, y)
