@@ -303,7 +303,7 @@ export default {
     let $vm = this
     $vm.logging(process.env)
     $vm.$i18n.locale = $vm.$route.params.language
-    let url = 'https://script.google.com/macros/s/AKfycbwaWEA2ZQcqYlc9Vqfc0fgacOwM_8pGoqP5O9sL_tM2j-RkDEY/exec?id=' + $vm.$route.params.id
+    let url = '/static/json/' + $vm.$route.params.id + '.json'
     this.axios
       .get(url, { crossDomain: true })
       .then(response => {
