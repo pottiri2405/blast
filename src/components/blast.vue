@@ -51,7 +51,7 @@
         </b-col>
       </b-row>
     </b-container>
-    <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
+    <b-modal ref="modal-start" size="sm" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
       <p v-html="$t('message.blast_start_text')"></p>
       <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
     </b-modal>
@@ -71,6 +71,9 @@
             </p>
             <p>{{ $t("message.thank_you") }}</p>
             <p>
+              <b-button pill size="sm" variant="warning" v-touch="restart">
+                {{ $t("message.restart") }}
+              </b-button>
               <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
                 {{ $t("message.to_previous_stage") }}
               </b-button>
@@ -78,16 +81,11 @@
                 {{ $t("message.to_next_stage") }}
               </b-button>
             </p>
-            <p>
-              <b-button pill size="sm" variant="warning" v-touch="restart">
-                {{ $t("message.restart") }}
-              </b-button>
-            </p>
             <h6>
               {{ $t("message.to_another_level") }}
             </h6>
-            <p v-for="l in getAnotherLevelList()" :key="'to-level-' + l">
-              <b-button pill size="sm" variant="info" v-touch="moveAnotherLevel(l)">
+            <p>
+              <b-button v-for="l in getAnotherLevelList()" :key="'to-level-' + l" pill size="sm" variant="info" v-touch="moveAnotherLevel(l)">
                 {{ $t("message.to_level_" + l) }}
               </b-button>
             </p>
@@ -95,7 +93,7 @@
         </b-row>
       </b-container>
     </b-modal>
-    <b-modal ref="modal-failure" size="md" hide-header hide-footer clas="middle">
+    <b-modal ref="modal-failure" size="md" hide-header hide-footer>
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
@@ -104,6 +102,9 @@
             </h3>
             <p>{{ $t("message.thank_you") }}</p>
             <p>
+              <b-button pill size="sm" variant="warning" v-touch="restart">
+                {{ $t("message.restart") }}
+              </b-button>
               <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
                 {{ $t("message.to_previous_stage") }}
               </b-button>
@@ -111,16 +112,11 @@
                 {{ $t("message.to_next_stage") }}
               </b-button>
             </p>
-            <p>
-              <b-button pill size="sm" variant="warning" v-touch="restart">
-                {{ $t("message.restart") }}
-              </b-button>
-            </p>
             <h6>
               {{ $t("message.to_another_level") }}
             </h6>
-            <p v-for="l in getAnotherLevelList()" :key="'to-level-' + l">
-              <b-button pill size="sm" variant="info" v-touch="moveAnotherLevel(l)">
+            <p>
+              <b-button v-for="l in getAnotherLevelList()" :key="'to-level-' + l" pill size="sm" variant="info" v-touch="moveAnotherLevel(l)">
                 {{ $t("message.to_level_" + l) }}
               </b-button>
             </p>
@@ -347,12 +343,13 @@ export default {
       return r
     },
     moveAnotherLevel (level) {
+      let $vm = this
       return function (event) {
-        if (this.$route.params.language === 'en') {
+        if ($vm.$route.params.language === 'en') {
           window.parent.location.href = 'https://blast-en.pottiri.tech/posts/level' + level + '-1'
         } else {
           window.parent.location.href = 'https://blast.pottiri.tech/posts/level' + level + '-1'
-          }
+        }
       }
     }
   },
