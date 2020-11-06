@@ -34,7 +34,7 @@
               v-touch:start="setRedBomb(x, y)"
               class="box-base"
               v-bind:class="{
-                'box-large': (data.size < 10),
+                'box-large2': (data.size < 10),
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
                 'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
@@ -414,7 +414,7 @@ export default {
   color: #000000;
   padding: 0px;
 }
-.box-large {
+.box-large2 {
   font-size: x-large;
   min-width: 2.25rem !important;
   min-height: 2.25rem !important;
