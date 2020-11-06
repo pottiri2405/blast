@@ -225,8 +225,6 @@ export default {
           this.setExplosion(mx, my, false)
         }
       }
-      await this.sleep(100)
-      //this.explosion = {}
       this.buruburu = {}
       for (let k of blackBombs) {
         let xy = k.split('-')
