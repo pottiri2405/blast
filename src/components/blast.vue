@@ -71,15 +71,27 @@
               </span>
             </p>
             <p>{{ $t("message.thank_you") }}</p>
-            <b-button v-if="data['prevent1']" pill size="sm" variant="info" v-touch="prevent">
-              {{ $t("message.to_prevent_stage") }}
-            </b-button>
-            <b-button v-if="data['next1']" pill size="sm" variant="info" v-touch="next">
-              {{ $t("message.to_next_stage") }}
-            </b-button>
-            <b-button pill size="sm" variant="warning" v-touch="restart">
-              {{ $t("message.restart") }}
-            </b-button>
+            <p>
+              <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
+                {{ $t("message.to_previous_stage") }}
+              </b-button>
+              <b-button v-if="existNext()" pill size="sm" variant="info" v-touch="next">
+                {{ $t("message.to_next_stage") }}
+              </b-button>
+            </p>
+            <p>
+              <b-button pill size="sm" variant="warning" v-touch="restart">
+                {{ $t("message.restart") }}
+              </b-button>
+            </p>
+            <h6>
+              {{ $t("message.to_another_level") }}
+            </h6>
+            <p v-for="l in getAnotherLevelList()" :key="'to-level-' + l">
+              <b-button pill size="sm" variant="info" v-touch="moveAnotherLevel(l)">
+                {{ $t("message.to_level_" + l) }}
+              </b-button>
+            </p>
           </b-col>
         </b-row>
       </b-container>
@@ -89,13 +101,30 @@
         <b-row>
           <b-col class="text-center align-middle">
             <h3>
-              {{ $t("message.failure_message") }}
-              <b-icon icon="arrow90deg-right" rotate="90"></b-icon>
+              <p v-html="$t('message.failure_message')"></p>
             </h3>
             <p>{{ $t("message.thank_you") }}</p>
-            <b-button pill size="sm" variant="warning" v-touch="restart">
-              {{ $t("message.restart") }}
-            </b-button>
+            <p>
+              <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
+                {{ $t("message.to_previous_stage") }}
+              </b-button>
+              <b-button v-if="existNext()" pill size="sm" variant="info" v-touch="next">
+                {{ $t("message.to_next_stage") }}
+              </b-button>
+            </p>
+            <p>
+              <b-button pill size="sm" variant="warning" v-touch="restart">
+                {{ $t("message.restart") }}
+              </b-button>
+            </p>
+            <h6>
+              {{ $t("message.to_another_level") }}
+            </h6>
+            <p v-for="l in getAnotherLevelList()" :key="'to-level-' + l">
+              <b-button pill size="sm" variant="info" v-touch="moveAnotherLevel(l)">
+                {{ $t("message.to_level_" + l) }}
+              </b-button>
+            </p>
           </b-col>
         </b-row>
       </b-container>
@@ -197,25 +226,27 @@ export default {
           this.setExplosion(mx, my, false)
         }
       }
-      //await this.sleep(100)
+      await this.sleep(100)
       //this.explosion = {}
       this.buruburu = {}
       for (let k of blackBombs) {
         let xy = k.split('-')
-        await this.fire(xy[0], xy[1])
+        if (this.isBlackBomb(xy[0], xy[1])) {
+          await this.fire(xy[0], xy[1])
+        }
       }
     },
     isRedBomb (x, y) {
       return Object.keys(this.bomb).includes(this.getKey(x, y))
     },
     isBlackBomb (x, y) {
-      return (this.data.map[y][x] === 'black-bomb' && !this.isExplosion(x, y))
+      return (this.data.map[y][x] === 'black-bomb' && this.isExplosion(x, y) === false && this.isBuruBuru(x, y) === false)
     },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
     },
     isBreakable1 (x, y) {
-      return (this.data.map[y][x] === 'breakable1' && !this.isExplosion(x, y))
+      return (this.data.map[y][x] === 'breakable1' && this.isExplosion(x, y) === false)
     },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
@@ -224,7 +255,6 @@ export default {
       } else {
         this.explosion[key] = {count: 1, bomb: bomb}
       }
-      //this.data.map[y][x] = 'none'
     },
     setBuruBuru (x, y) {
       const key = this.getKey(x, y)
@@ -240,7 +270,7 @@ export default {
       return Object.keys(this.buruburu).includes(this.getKey(x, y))
     },
     explosionCount (x, y) {
-      if (!Object.keys(this.explosion).includes(this.getKey(x, y)) || this.explosion[this.getKey(x, y)].count === 1) return '　'
+      if (!Object.keys(this.explosion).includes(this.getKey(x, y)) || this.explosion[this.getKey(x, y)].count === 1) return '&nbsp;'
       return this.explosion[this.getKey(x, y)].count
     },
     gameStart () {
@@ -285,18 +315,50 @@ export default {
         this.zeroPrefix(sec, 2) + '.' +
         this.zeroPrefix(ms, 3)
     },
-    prevent () {
-      if (this.$route.params.language === 'ja') {
-        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.data.prevent1
+    existPrevious () {
+      if (this.$route.params.previous === 'false' || this.$route.params.previous === false) return false
+      return true
+    },
+    previous () {
+      if (this.$route.params.language === 'en') {
+        window.parent.location.href = 'https://blast-en.pottiri.tech/posts/' + this.$route.params.previous
+      } else {
+        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.$route.params.previous
       }
     },
+    existNext () {
+      if (this.$route.params.next === 'false' || this.$route.params.next === false) return false
+      return true
+    },
     next () {
-      if (this.$route.params.language === 'ja') {
-        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.data.next1
+      if (this.$route.params.language === 'en') {
+        window.parent.location.href = 'https://blast-en.pottiri.tech/posts/' + this.$route.params.next
+      } else {
+        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.$route.params.next
       }
     },
     restart () {
       this.$router.go({path: this.$router.currentRoute.path, force: true})
+    },
+    getAnotherLevelList () {
+      let r = []
+      if (this.$route.params.id.startsWith('level0')) {
+        r.push(1)
+      } else if (this.$route.params.id.startsWith('level1')) {
+        r.push(0)
+      }
+      return r
+    },
+    moveAnotherLevel (level) {
+      return function (event) {
+        let prefix = 'level'
+        if (this.$route.params.language === 'ja') prefix = 'レベル'
+        if (this.$route.params.language === 'en') {
+          window.parent.location.href = 'https://blast-en.pottiri.tech/categories/' + prefix + level
+        } else {
+          window.parent.location.href = 'https://blast.pottiri.tech/categories/' + prefix + level
+        }
+      }
     }
   },
   mounted () {
@@ -354,10 +416,10 @@ export default {
 }
 .box-large {
   font-size: x-large;
-  min-width: 2.5rem !important;
-  min-height: 2.5rem !important;
-  max-width: 2.5rem !important;
-  max-height: 2.5rem !important;
+  min-width: 2.25rem !important;
+  min-height: 2.25rem !important;
+  max-width: 2.25rem !important;
+  max-height: 2.25rem !important;
 }
 .box-row-last {
   border-bottom: 1px solid #000000;
@@ -424,5 +486,8 @@ export default {
 .img-small {
   height: 2rem;
   width: 2rem;
+}
+.modal-dialog {
+  top: 10% !important;
 }
 </style>

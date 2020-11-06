@@ -15,14 +15,17 @@
       "complete_message": "全問正解！",
       "goal_message": "GOAL!",
       "success_message": "クリア！",
-      "failure_message": "残念・・・",
+      "failure_message": "残念・・・<b-icon icon=\"arrow90deg-right\" rotate=\"90\"></b-icon>",
       "time": "タイム：",
       "thank_you": "プレイしていただきありがとうございました！",
       "how_to_play": "遊び方",
       "google_search_result": "Google画像検索",
       "blast_start_text": "<img src=\"/static/bomb/red-bomb.svg\" class=\"img-small\">を設置して<img src=\"/static/bomb/black-bomb.svg\" class=\"img-small\">と<img src=\"/static/bomb/breakable1.svg\" class=\"img-small\">を全て爆破<img src=\"/static/bomb/explosion-start.svg\" class=\"img-small\"><img src=\"/static/bomb/explosion.svg\" class=\"img-small\">してください。<br><img src=\"/static/bomb/unbreakable.svg\" class=\"img-small\">は爆破できません。",
-      "to_prevent_stage": "前のStageへ",
-      "to_next_stage": "次のStageへ"
+      "to_previous_stage": "前の面へ",
+      "to_next_stage": "次の面へ",
+      "to_another_level": "他のレベルへ",
+      "to_level_0": "レベル0へ",
+      "to_level_1": "レベル1へ"      
     }
   },
   "en": {
@@ -41,15 +44,18 @@
       "complete_message": "COMPLETE!",
       "goal_message": "GOAL!",
       "success_message": "SUCCESS!",
-      "failure_message": "FAILURE...",
+      "failure_message": "FAILURE...<b-icon icon=\"arrow90deg-right\" rotate=\"90\"></b-icon>",
       "time": "Time:",
       "thank_you": "Thank you for playing!",
       "how_to_play": "How to play",
       "google_search_result": "Google Image Search",
       "next_word_hint": "<Next word hint>",
       "blast_start_text": "Place a <img src=\"/static/bomb/red-bomb.svg\" class=\"img-small\"> and blow up<img src=\"/static/bomb/explosion-start.svg\" class=\"img-small\"><img src=\"/static/bomb/explosion.svg\" class=\"img-small\"> all <img src=\"/static/bomb/black-bomb.svg\" class=\"img-small\"> and <img src=\"/static/bomb/breakable1.svg\" class=\"img-small\">!<br><img src=\"/static/bomb/unbreakable.svg\" class=\"img-small\"> cannot be blown up.",
-      "to_prevent_stage": "前のStageへ",
-      "to_next_stage": "次のStageへ"      
+      "to_previous_stage": "To previous stage",
+      "to_next_stage": "To next stage",
+      "to_another_level": "To another level",
+      "to_level_0": "To level0",
+      "to_level_1": "To level1"
     }
   }
 }
