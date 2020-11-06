@@ -350,13 +350,11 @@ export default {
     },
     moveAnotherLevel (level) {
       return function (event) {
-        let prefix = 'level'
-        if (this.$route.params.language === 'ja') prefix = 'レベル'
         if (this.$route.params.language === 'en') {
-          window.parent.location.href = 'https://blast-en.pottiri.tech/categories/' + prefix + level
+          window.parent.location.href = 'https://blast-en.pottiri.tech/posts/level' + level + '-1'
         } else {
-          window.parent.location.href = 'https://blast.pottiri.tech/categories/' + prefix + level
-        }
+          window.parent.location.href = 'https://blast.pottiri.tech/posts/level' + level + '-1'
+          }
       }
     }
   },
