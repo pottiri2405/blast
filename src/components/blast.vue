@@ -34,7 +34,6 @@
               v-touch:start="setRedBomb(x, y)"
               class="box-base"
               v-bind:class="{
-                'box-large2': (data.size < 10),
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
                 'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
@@ -52,14 +51,14 @@
         </b-col>
       </b-row>
     </b-container>
-    <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop class="middle">
+    <b-modal ref="modal-start" size="xl" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
       <p v-html="$t('message.blast_start_text')"></p>
       <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
     </b-modal>
-    <b-modal ref="modal-count-down" size="sm" hide-header hide-footer no-close-on-esc no-close-on-backdrop class="middle">
+    <b-modal ref="modal-count-down" size="sm" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
       <h2 class="text-center">{{ countDown }}</h2>
     </b-modal>
-    <b-modal ref="modal-complete" size="md" hide-header hide-footer clas="middle">
+    <b-modal ref="modal-complete" size="md" hide-header hide-footer>
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
@@ -469,9 +468,6 @@ export default {
   padding: 0px;
   padding-top: 0.25rem;
   /* border-radius: 50rem; */
-}
-.modal.middle {
-  top: 50% !important;
 }
 .buruburu {
   animation: hurueru .1s  infinite;
