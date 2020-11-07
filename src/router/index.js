@@ -20,12 +20,12 @@ Vue.use(Vue2TouchEvents, { // added
 export default new Router({
   routes: [
     {
-      path: '/blast/:id/:language/:previous/:next',
-      name: 'blast_with_move',
+      path: '/blast/:id/:language',
+      name: 'blast_with_language',
       component: blast
     },
     {
-      path: '/blast/:id/:language',
+      path: '/blast/:id',
       name: 'blast',
       component: blast
     },

@@ -138,6 +138,9 @@ const DIRECTIONS = [
   {axis: 'ne', rx: 0, ry: 1, fx: 0, fy: -1},
   {axis: 'nw', rx: 1, ry: 1, fx: -1, fy: -1}
 ]
+const MAIN_URL_JA = 'https://blast.pottiri.tech'
+const MAIN_URL_EN = 'https://blast-en.pottiri.tech'
+
 export default {
   data () {
     return {
@@ -148,7 +151,9 @@ export default {
       bomb: {},
       explosion: {},
       buruburu: {},
-      countDown: 3
+      countDown: 3,
+      previousUrl: null,
+      nextUrl: null
     }
   },
   methods: {
@@ -309,26 +314,16 @@ export default {
         this.zeroPrefix(ms, 3)
     },
     existPrevious () {
-      if (this.$route.params.previous === 'false' || this.$route.params.previous === false) return false
-      return true
+      return (this.previousUrl !== null)
     },
     previous () {
-      if (this.$route.params.language === 'en') {
-        window.parent.location.href = 'https://blast-en.pottiri.tech/posts/' + this.$route.params.previous
-      } else {
-        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.$route.params.previous
-      }
+      window.parent.location.href = MAIN_URL_EN + '/posts/' + this.previousUrl
     },
     existNext () {
-      if (this.$route.params.next === 'false' || this.$route.params.next === false) return false
-      return true
+      return (this.nextUrl !== null)
     },
     next () {
-      if (this.$route.params.language === 'en') {
-        window.parent.location.href = 'https://blast-en.pottiri.tech/posts/' + this.$route.params.next
-      } else {
-        window.parent.location.href = 'https://blast.pottiri.tech/posts/' + this.$route.params.next
-      }
+      window.parent.location.href = this.nextUrl
     },
     restart () {
       this.$router.go({path: this.$router.currentRoute.path, force: true})
@@ -346,9 +341,9 @@ export default {
       let $vm = this
       return function (event) {
         if ($vm.$route.params.language === 'en') {
-          window.parent.location.href = 'https://blast-en.pottiri.tech/posts/level' + level + '-1'
+          window.parent.location.href = MAIN_URL_EN + '/posts/level' + level + '-1'
         } else {
-          window.parent.location.href = 'https://blast.pottiri.tech/posts/level' + level + '-1'
+          window.parent.location.href = MAIN_URL_JA + '/posts/level' + level + '-1'
         }
       }
     }
@@ -356,10 +351,18 @@ export default {
   mounted () {
     let $vm = this
     $vm.logging(process.env)
-    $vm.$i18n.locale = $vm.$route.params.language
-    let url = '/static/json/' + $vm.$route.params.id + '.json'
-    this.axios
-      .get(url, { crossDomain: true })
+    $vm.logging($vm.$route.params)
+    if (window.parent.location.href.indexOf(MAIN_URL_EN) !== -1) {
+      $vm.$i18n.locale = 'en'
+    }
+    if (window.parent.location.href.indexOf(MAIN_URL_JA) !== -1) {
+      $vm.$i18n.locale = 'ja'
+    }
+    if ($vm.$route.params['language']) {
+      $vm.$i18n.locale = $vm.$route.params.language
+    }
+    $vm.axios
+      .get('/static/json/' + $vm.$route.params.id + '.json', { crossDomain: true })
       .then(response => {
         $vm.logging(response)
         $vm.data = response.data
@@ -371,6 +374,39 @@ export default {
       .catch(err => {
         alert('通信エラーが発生しました。')
         console.log('err:', err)
+      })
+
+    let ids = $vm.$route.params.id.split('-')
+    let p = parseInt(ids[1]) - 1
+    let n = parseInt(ids[1]) + 1
+    let previous = ''
+    let next = ''
+    if ($vm.$route.params.language === 'en') {
+      previous = MAIN_URL_EN + '/posts/' + ids[0] + '-' + p
+      next = MAIN_URL_EN + '/posts/' + ids[0] + '-' + n
+    } else {
+      previous = MAIN_URL_JA + '/posts/' + ids[0] + '-' + p
+      next = MAIN_URL_JA + '/posts/' + ids[0] + '-' + n
+    }
+    $vm.axios
+      .get(previous, { crossDomain: true })
+      .then(response => {
+        if (response.status === 200) {
+          $vm.previousUrl = previous
+        }
+      })
+      .catch(err => {
+        $vm.logging('check previous error! err:' + err)
+      })
+    $vm.axios
+      .get(next, { crossDomain: true })
+      .then(response => {
+        if (response.status === 200) {
+          $vm.nextUrl = next
+        }
+      })
+      .catch(err => {
+        $vm.logging('check next error! err:' + err)
       })
   }
 }
