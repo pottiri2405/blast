@@ -352,10 +352,10 @@ export default {
     let $vm = this
     $vm.logging(process.env)
     $vm.logging($vm.$route.params)
-    if (window.parent.location.href.indexOf(MAIN_URL_EN) !== -1) {
+    if (document.referrer.indexOf(MAIN_URL_EN) !== -1) {
       $vm.$i18n.locale = 'en'
     }
-    if (window.parent.location.href.indexOf(MAIN_URL_JA) !== -1) {
+    if (document.referrer.indexOf(MAIN_URL_JA) !== -1) {
       $vm.$i18n.locale = 'ja'
     }
     if ($vm.$route.params['language']) {
@@ -389,7 +389,7 @@ export default {
       next = MAIN_URL_JA + '/posts/' + ids[0] + '-' + n
     }
     $vm.axios
-      .get('/static/json/' + ids[0] + '-' + p + '.json', { crossDomain: true })
+      .get(previous, { crossDomain: true })
       .then(response => {
         if (response.status === 200) {
           $vm.previousUrl = previous
@@ -399,7 +399,7 @@ export default {
         $vm.logging('check previous error! err:' + err)
       })
     $vm.axios
-      .get('/static/json/' + ids[0] + '-' + n + '.json', { crossDomain: true })
+      .get(next, { crossDomain: true })
       .then(response => {
         if (response.status === 200) {
           $vm.nextUrl = next
