@@ -389,7 +389,7 @@ export default {
       next = MAIN_URL_JA + '/posts/' + ids[0] + '-' + n
     }
     $vm.axios
-      .get(previous, { crossDomain: true })
+      .get('/static/json/' + ids[0] + '-' + p + '.json', { crossDomain: true })
       .then(response => {
         if (response.status === 200) {
           $vm.previousUrl = previous
@@ -399,7 +399,7 @@ export default {
         $vm.logging('check previous error! err:' + err)
       })
     $vm.axios
-      .get(next, { crossDomain: true })
+      .get('/static/json/' + ids[0] + '-' + n + '.json', { crossDomain: true })
       .then(response => {
         if (response.status === 200) {
           $vm.nextUrl = next
