@@ -42,7 +42,8 @@
                 'red-bomb': (isRedBomb(x, y) && countDown > 0),
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
-                'breakable1': isBreakable1(x, y)
+                'breakable1': isBreakable1(x, y),
+                'enemy': isEnemy(x, y)
                 }">
                 &nbsp;
               </td>
@@ -249,6 +250,9 @@ export default {
     isBreakable1 (x, y) {
       return (this.data.map[y][x] === 'breakable1' && this.isExplosion(x, y) === false)
     },
+    isEnemy (x, y) {
+      return (this.data.map[y][x] === 'enemy')
+    },    
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
       if (Object.keys(this.explosion).includes(key)) {
@@ -478,6 +482,10 @@ export default {
 }
 .breakable1 {
   background-image: url("/static/bomb/breakable1.svg");
+  background-size: cover;
+}
+.enemy {
+  background-image: url("/static/bomb/enemy.svg");
   background-size: cover;
 }
 .explosion {
