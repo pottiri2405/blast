@@ -252,7 +252,7 @@ export default {
     },
     isEnemy (x, y) {
       return (this.data.map[y][x] === 'enemy')
-    },    
+    },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
       if (Object.keys(this.explosion).includes(key)) {
