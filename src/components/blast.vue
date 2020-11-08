@@ -357,10 +357,10 @@ export default {
     $vm.logging(process.env)
     $vm.logging($vm.$route.params)
     if (document.referrer.indexOf(MAIN_URL_EN) !== -1) {
-      $vm.$i18n.locale = 'en'
+      $vm.$route.params.language = 'en'
     }
     if (document.referrer.indexOf(MAIN_URL_JA) !== -1) {
-      $vm.$i18n.locale = 'ja'
+      $vm.$route.params.language = 'ja'
     }
     if ($vm.$route.params['language']) {
       $vm.$i18n.locale = $vm.$route.params.language
