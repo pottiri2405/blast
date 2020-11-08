@@ -326,7 +326,11 @@ export default {
       window.parent.location.href = this.nextUrl
     },
     restart () {
-      this.$router.go({path: this.$router.currentRoute.path, force: true})
+      if (this.$route.params['language']) {
+        this.$router.go({path: this.$router.currentRoute.path, force: true})
+      } else {
+        this.$router.go({path: this.$router.currentRoute.path + '/' + this.$i18n.locale, force: true})
+      }
     },
     getAnotherLevelList () {
       let r = []
