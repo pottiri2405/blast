@@ -5,7 +5,7 @@
       "start": "スタート！",
       "hint": "ヒント",
       "restart": "リスタート",
-      "retry": "もう一度同じ問題をやる",
+      "retry": "リトライ",
       "question": "問題",
       "correct": "正解！",
       "thumbnail_size": "{size}✕{size}マス",
@@ -14,18 +14,18 @@
       "checked_clear": "選択クリア",
       "complete_message": "全問正解！",
       "goal_message": "GOAL!",
-      "success_message": "クリア！",
-      "failure_message": "残念・・・<b-icon icon=\"arrow90deg-right\" rotate=\"90\"></b-icon>",
+      "success_message": "SUCCESS！<img src=\"/static/bomb/cracker.svg\" class=\"img-small\">",
+      "failure_message": "FAILURE・・・<b-icon icon=\"arrow90deg-right\" rotate=\"90\"></b-icon>",
       "time": "タイム：",
       "thank_you": "プレイしていただきありがとうございました！",
       "how_to_play": "遊び方",
       "google_search_result": "Google画像検索",
       "blast_start_text": "<img src=\"/static/bomb/red-bomb.svg\" class=\"img-small\">を設置して<img src=\"/static/bomb/black-bomb.svg\" class=\"img-small\">と<img src=\"/static/bomb/breakable1.svg\" class=\"img-small\">を全て爆破<img src=\"/static/bomb/explosion-start.svg\" class=\"img-small\"><img src=\"/static/bomb/explosion.svg\" class=\"img-small\">してください。<br><img src=\"/static/bomb/unbreakable.svg\" class=\"img-small\">は爆破できません。",
-      "to_previous_stage": "前の面へ",
-      "to_next_stage": "次の面へ",
+      "to_previous_stage": "前へ",
+      "to_next_stage": "次へ",
       "to_another_level": "他のレベルへ",
-      "to_level_0": "レベル0へ",
-      "to_level_1": "レベル1へ"      
+      "to_level_0": "レベル 0",
+      "to_level_1": "レベル 1"      
     }
   },
   "en": {
@@ -43,7 +43,7 @@
       "checked_clear": "Clear",
       "complete_message": "COMPLETE!",
       "goal_message": "GOAL!",
-      "success_message": "SUCCESS!",
+      "success_message": "SUCCESS!<img src=\"/static/bomb/cracker.svg\" class=\"img-small\">",
       "failure_message": "FAILURE...<b-icon icon=\"arrow90deg-right\" rotate=\"90\"></b-icon>",
       "time": "Time:",
       "thank_you": "Thank you for playing!",
@@ -51,11 +51,11 @@
       "google_search_result": "Google Image Search",
       "next_word_hint": "<Next word hint>",
       "blast_start_text": "Place a <img src=\"/static/bomb/red-bomb.svg\" class=\"img-small\"> and blow up<img src=\"/static/bomb/explosion-start.svg\" class=\"img-small\"><img src=\"/static/bomb/explosion.svg\" class=\"img-small\"> all <img src=\"/static/bomb/black-bomb.svg\" class=\"img-small\"> and <img src=\"/static/bomb/breakable1.svg\" class=\"img-small\"> !<br><img src=\"/static/bomb/unbreakable.svg\" class=\"img-small\"> cannot be blown up.",
-      "to_previous_stage": "To previous stage",
-      "to_next_stage": "To next stage",
+      "to_previous_stage": "Previous",
+      "to_next_stage": "Next",
       "to_another_level": "To another level",
-      "to_level_0": "To level0",
-      "to_level_1": "To level1"
+      "to_level_0": "Level 0",
+      "to_level_1": "Level 1"
     }
   }
 }

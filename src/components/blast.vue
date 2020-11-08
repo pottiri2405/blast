@@ -62,7 +62,9 @@
       <b-container>
         <b-row>
           <b-col class="text-center align-middle">
-            <h3>{{ $t("message.success_message") }}</h3>
+            <h3>
+              <p v-html="$t('message.success_message')"></p>
+            </h3>            
             <p>
               <b-icon icon="stopwatch" font-scale="2"></b-icon>
               <span id="timer" class="bg-dark text-light pl-2 pr-2">
@@ -71,8 +73,8 @@
             </p>
             <p>{{ $t("message.thank_you") }}</p>
             <p>
-              <b-button pill size="sm" variant="warning" v-touch="restart">
-                {{ $t("message.restart") }}
+              <b-button pill size="sm" variant="warning" v-touch="retry">
+                {{ $t("message.retry") }}
               </b-button>
               <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
                 {{ $t("message.to_previous_stage") }}
@@ -102,8 +104,8 @@
             </h3>
             <p>{{ $t("message.thank_you") }}</p>
             <p>
-              <b-button pill size="sm" variant="warning" v-touch="restart">
-                {{ $t("message.restart") }}
+              <b-button pill size="sm" variant="warning" v-touch="retry">
+                {{ $t("message.retry") }}
               </b-button>
               <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
                 {{ $t("message.to_previous_stage") }}
