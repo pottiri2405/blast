@@ -64,7 +64,7 @@
           <b-col class="text-center align-middle">
             <h3>
               <p v-html="$t('message.success_message')"></p>
-            </h3>            
+            </h3>
             <p>
               <b-icon icon="stopwatch" font-scale="2"></b-icon>
               <span id="timer" class="bg-dark text-light pl-2 pr-2">
@@ -73,7 +73,7 @@
             </p>
             <p>{{ $t("message.thank_you") }}</p>
             <p>
-              <b-button pill size="sm" variant="warning" v-touch="retry">
+              <b-button pill size="sm" variant="warning" v-touch="restart">
                 {{ $t("message.retry") }}
               </b-button>
               <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
@@ -104,7 +104,7 @@
             </h3>
             <p>{{ $t("message.thank_you") }}</p>
             <p>
-              <b-button pill size="sm" variant="warning" v-touch="retry">
+              <b-button pill size="sm" variant="warning" v-touch="restart">
                 {{ $t("message.retry") }}
               </b-button>
               <b-button v-if="existPrevious()" pill size="sm" variant="info" v-touch="previous">
@@ -147,6 +147,7 @@ export default {
   data () {
     return {
       init: true,
+      language: null,
       timer: {time: '00:00:00.000', began: null, stopped: null, duration: 0, started: null, running: false},
       data: {map: {}},
       life: {remaining: 0, max: 100},
@@ -328,10 +329,10 @@ export default {
       window.parent.location.href = this.nextUrl
     },
     restart () {
-      if (this.$route.params['language']) {
-        this.$router.go({path: this.$router.currentRoute.path, force: true})
+      if (this.language !== null) {
+        this.$router.go({path: this.$router.currentRoute.path + '/' + this.language, force: true})
       } else {
-        this.$router.go({path: this.$router.currentRoute.path + '/' + this.$i18n.locale, force: true})
+        this.$router.go({path: this.$router.currentRoute.path, force: true})
       }
     },
     getAnotherLevelList () {
@@ -359,10 +360,12 @@ export default {
     $vm.logging(process.env)
     $vm.logging($vm.$route.params)
     if (document.referrer.indexOf(MAIN_URL_EN) !== -1) {
-      $vm.$route.params.language = 'en'
+      $vm.language = 'en'
+      $vm.$i18n.locale = $vm.language
     }
     if (document.referrer.indexOf(MAIN_URL_JA) !== -1) {
-      $vm.$route.params.language = 'ja'
+      $vm.language = 'ja'
+      $vm.$i18n.locale = $vm.language
     }
     if ($vm.$route.params['language']) {
       $vm.$i18n.locale = $vm.$route.params.language
