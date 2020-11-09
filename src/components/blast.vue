@@ -198,7 +198,7 @@ export default {
             delete $vm.bomb[key]
           }
           await $vm.sleep(3000)
-          if ($vm.data.installations['black-bomb'] <= 0 && $vm.data.installations.breakable1 <= 0) {
+          if (parseInt($vm.data.installations['black-bomb']) <= 0 && parseInt($vm.data.installations.breakable1) <= 0) {
             $vm.$refs['modal-complete'].show()
           } else {
             $vm.$refs['modal-failure'].show()
@@ -337,7 +337,7 @@ export default {
     },
     restart () {
       if (this.language !== null) {
-        this.$router.go({path: this.$router.currentRoute.path + this.language, force: true})
+        this.$router.go({path: this.$router.currentRoute.path + '/' + this.language, force: true})
       } else {
         this.$router.go({path: this.$router.currentRoute.path, force: true})
       }
