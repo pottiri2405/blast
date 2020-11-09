@@ -134,7 +134,7 @@
     {{data.installations.breakable1}}
     {{parseInt(data.installations.breakable1)}}
     {{parseInt(data.installations.breakable1) <= 0}}
-    {{$route.params['language']}}
+    {{$route.params.language}}
   </div>
 </template>
 
