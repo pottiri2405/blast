@@ -43,7 +43,7 @@
       "checked_clear": "Clear",
       "complete_message": "COMPLETE!",
       "goal_message": "GOAL!",
-      "success_message": "SUCCESS!<img src=\"/static/bomb/cracker.svg\" class=\"img-small\">",
+      "success_message": "SUCCESS!",
       "failure_message": "FAILURE...<b-icon icon=\"arrow90deg-right\" rotate=\"90\"></b-icon>",
       "time": "Time:",
       "thank_you": "Thank you for playing!",
