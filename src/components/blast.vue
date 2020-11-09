@@ -127,6 +127,9 @@
         </b-row>
       </b-container>
     </b-modal>
+    {{$router.currentRoute.path + language}}
+    {{data.installations['black-bomb']}}
+    {{data.installations.breakable1}}
   </div>
 </template>
 
