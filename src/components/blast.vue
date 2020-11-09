@@ -127,9 +127,14 @@
         </b-row>
       </b-container>
     </b-modal>
-    {{$router.currentRoute.path + '/' +language}}
+    {{$router.currentRoute.path + '/' + language}}
+    {{data.installations['black-bomb']}}
+    {{parseInt(data.installations['black-bomb'])}}
     {{parseInt(data.installations['black-bomb']) <= 0}}
+    {{data.installations.breakable1}}
+    {{parseInt(data.installations.breakable1)}}
     {{parseInt(data.installations.breakable1) <= 0}}
+    {{$route.params['language']}}
   </div>
 </template>
 
