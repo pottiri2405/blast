@@ -26,7 +26,7 @@
       </b-row>
       <b-row class="mt-2">
         <b-col class="pl-0">
-          <table>
+          <table id="map">
             <tr v-for="(chars, y) in data.map" :key="'row-' + y">
               <td border
               v-for="(char, x) in chars"
@@ -432,6 +432,14 @@ export default {
   width: 50px;
   top: 50px;
   left:calc(50% - 50px/2);
+}
+@media screen and (max-width: 768px) {
+  #map {
+   position: absolute;
+   left: 50%;
+   -webkit-transform: translate(-50%, 0);
+   transform: translate(-50%, 0);
+  }
 }
 .remaining {
   min-width: 1.75rem !important;
