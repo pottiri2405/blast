@@ -324,7 +324,7 @@ export default {
       return (this.previousUrl !== null)
     },
     previous () {
-      window.parent.location.href = MAIN_URL_EN + '/posts/' + this.previousUrl
+      window.parent.location.href = this.previousUrl
     },
     existNext () {
       return (this.nextUrl !== null)
