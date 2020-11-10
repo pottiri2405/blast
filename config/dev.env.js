@@ -4,5 +4,6 @@ const prodEnv = require('./prod.env')
 
 module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',
-  API_URL_STAGE: '"http://localhost:9000/.netlify/functions/stage"' // add by POTTIRI
+  MAIN_URL_JA: '"http://localhost:1313"', // add by POTTIRI
+  MAIN_URL_EN: '"http://localhost:1313"' // add by POTTIRI
 })

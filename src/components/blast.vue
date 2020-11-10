@@ -43,7 +43,7 @@
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
                 'breakable1': isBreakable1(x, y),
-                'enemy': isEnemy(x, y)
+                'enemy1': isEnemy1(x, y)
                 }">
                 &nbsp;
               </td>
@@ -141,8 +141,6 @@ const DIRECTIONS = [
   {axis: 'ne', rx: 0, ry: 1, fx: 0, fy: -1},
   {axis: 'nw', rx: 1, ry: 1, fx: -1, fy: -1}
 ]
-const MAIN_URL_JA = 'https://blast.pottiri.tech'
-const MAIN_URL_EN = 'https://blast-en.pottiri.tech'
 
 export default {
   data () {
@@ -221,6 +219,10 @@ export default {
             this.data.installations.breakable1--
             break
           }
+          if (this.isEnemy1(mx, my)) {
+            this.setExplosion(mx, my, false)
+            this.data.installations.enemy1--
+          }
           if (this.isBlackBomb(mx, my)) {
             if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
             this.setBuruBuru(mx, my)
@@ -250,8 +252,8 @@ export default {
     isBreakable1 (x, y) {
       return (this.data.map[y][x] === 'breakable1' && this.isExplosion(x, y) === false)
     },
-    isEnemy (x, y) {
-      return (this.data.map[y][x] === 'enemy')
+    isEnemy1 (x, y) {
+      return (this.data.map[y][x] === 'enemy1')
     },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
@@ -352,9 +354,9 @@ export default {
       let $vm = this
       return function (event) {
         if ($vm.$route.params.language === 'en') {
-          window.parent.location.href = MAIN_URL_EN + '/posts/level' + level + '-1'
+          window.parent.location.href = process.env.MAIN_URL_EN + '/posts/level' + level + '-1'
         } else {
-          window.parent.location.href = MAIN_URL_JA + '/posts/level' + level + '-1'
+          window.parent.location.href = process.env.MAIN_URL_JA + '/posts/level' + level + '-1'
         }
       }
     }
@@ -363,17 +365,7 @@ export default {
     let $vm = this
     $vm.logging(process.env)
     $vm.logging($vm.$route.params)
-    if (document.referrer.indexOf(MAIN_URL_EN) !== -1) {
-      $vm.language = 'en'
-      $vm.$i18n.locale = $vm.language
-    }
-    if (document.referrer.indexOf(MAIN_URL_JA) !== -1) {
-      $vm.language = 'ja'
-      $vm.$i18n.locale = $vm.language
-    }
-    if ($vm.$route.params['language']) {
-      $vm.$i18n.locale = $vm.$route.params.language
-    }
+    $vm.$i18n.locale = $vm.$route.params.language
     $vm.axios
       .get('/static/json/' + $vm.$route.params.id + '.json', { crossDomain: true })
       .then(response => {
@@ -395,11 +387,11 @@ export default {
     let previous = ''
     let next = ''
     if ($vm.$route.params.language === 'en') {
-      previous = MAIN_URL_EN + '/posts/' + ids[0] + '-' + p
-      next = MAIN_URL_EN + '/posts/' + ids[0] + '-' + n
+      previous = process.env.MAIN_URL_EN + '/posts/' + ids[0] + '-' + p
+      next = process.env.MAIN_URL_EN + '/posts/' + ids[0] + '-' + n
     } else {
-      previous = MAIN_URL_JA + '/posts/' + ids[0] + '-' + p
-      next = MAIN_URL_JA + '/posts/' + ids[0] + '-' + n
+      previous = process.env.MAIN_URL_JA + '/posts/' + ids[0] + '-' + p
+      next = process.env.MAIN_URL_JA + '/posts/' + ids[0] + '-' + n
     }
     $vm.axios
       .head(previous, { crossDomain: true })
@@ -492,8 +484,8 @@ export default {
   background-image: url("/static/bomb/breakable1.svg");
   background-size: cover;
 }
-.enemy {
-  background-image: url("/static/bomb/enemy.svg");
+.enemy1 {
+  background-image: url("/static/bomb/enemy1.svg");
   background-size: cover;
 }
 .explosion {
