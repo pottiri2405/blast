@@ -26,26 +26,26 @@
       </b-row>
       <b-row class="mt-2">
         <b-col class="pl-0">
+          <img v-for="(f, i) in blasts" v-bind:key="'fire-1-' + i" src="/static/bomb/fire.svg" class="fire" :style="blastStyle(f)">
           <table id="map">
             <tr v-for="(chars, y) in data.map" :key="'row-' + y">
               <td border
               v-for="(char, x) in chars"
-              :key="'col-' + y + '-' + x"
+              :key="'box' + x + '-' + y"
               v-touch:start="setRedBomb(x, y)"
               class="box-base"
               v-bind:class="{
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
-                'explosion': (isExplosion(x, y) && !isExplosionBomb(x, y)),
                 'explosion-bomb': isExplosionBomb(x, y),
-                'buruburu': isBuruBuru(x, y),
                 'red-bomb': (isRedBomb(x, y) && countDown > 0),
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
                 'breakable1': isBreakable1(x, y),
-                'enemy1': isEnemy1(x, y)
+                'enemy1': isEnemy1(x, y),
+                'enemy1-down': isEnemy1Down(x, y)
                 }">
-                &nbsp;
+                <p :ref="'box-' + x + '-' + y"></p>
               </td>
             </tr>
           </table>
@@ -138,9 +138,19 @@ const DIRECTIONS = [
   {axis: 'se', rx: -1, ry: -1, fx: 1, fy: 1},
   {axis: 'e', rx: -1, ry: 0, fx: 1, fy: 0},
   {axis: 'ne', rx: -1, ry: 1, fx: 1, fy: -1},
-  {axis: 'ne', rx: 0, ry: 1, fx: 0, fy: -1},
+  {axis: 'n', rx: 0, ry: 1, fx: 0, fy: -1},
   {axis: 'nw', rx: 1, ry: 1, fx: -1, fy: -1}
 ]
+const ROTATE = {
+  'w': {rotate: '90deg'},
+  'sw': {rotate: '45deg'},
+  's': {rotate: '0deg'},
+  'se': {rotate: '-45deg'},
+  'e': {rotate: '-90deg'},
+  'ne': {rotate: '-135deg'},
+  'n': {rotate: '180deg'},
+  'nw': {rotate: '135deg'}
+}
 
 export default {
   data () {
@@ -155,7 +165,8 @@ export default {
       buruburu: {},
       countDown: 3,
       previousUrl: null,
-      nextUrl: null
+      nextUrl: null,
+      blasts: []
     }
   },
   methods: {
@@ -205,8 +216,12 @@ export default {
       this.setExplosion(x, y, true)
       let blackBombs = []
       for (let d of DIRECTIONS) {
-        let mx = parseInt(x)
-        let my = parseInt(y)
+        let sx = parseInt(x)
+        let sy = parseInt(y)
+        let mx = sx
+        let my = sy
+        let tx = sx
+        let ty = sy
         while (1) {
           mx += d.fx
           my += d.fy
@@ -216,28 +231,38 @@ export default {
           if (this.isUnbreakable(mx, my)) break
           if (this.isBreakable1(mx, my)) {
             this.setExplosion(mx, my, false)
+            tx = mx
+            ty = my
             this.data.installations.breakable1--
             break
           }
           if (this.isEnemy1(mx, my)) {
             this.setExplosion(mx, my, false)
-            this.data.installations.enemy1--
+            this.data.map[my][mx] = 'enemy1-down'
+            tx = mx
+            ty = my
+            this.data.installations.enety1--
           }
           if (this.isBlackBomb(mx, my)) {
             if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
             this.setBuruBuru(mx, my)
+            tx = mx
+            ty = my
             this.data.installations['black-bomb']--
             continue
           }
-          this.setExplosion(mx, my, false)
+          this.setExplosion(tx, ty, false)
+          tx = mx
+          ty = my
+        }
+        if (sx !== tx || sy !== ty) {
+          this.blasting(d.axis, sx, sy, tx, ty)
         }
       }
       this.buruburu = {}
       for (let k of blackBombs) {
         let xy = k.split('-')
-        if (this.isBlackBomb(xy[0], xy[1])) {
-          await this.fire(xy[0], xy[1])
-        }
+        await this.fire(xy[0], xy[1])
       }
     },
     isRedBomb (x, y) {
@@ -255,10 +280,16 @@ export default {
     isEnemy1 (x, y) {
       return (this.data.map[y][x] === 'enemy1')
     },
+    isEnemy1Down (x, y) {
+      return (this.data.map[y][x] === 'enemy1-down')
+    },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
       if (Object.keys(this.explosion).includes(key)) {
         this.explosion[key].count++
+        if (bomb) {
+          this.explosion[key].bomb = bomb
+        }
       } else {
         this.explosion[key] = {count: 1, bomb: bomb}
       }
@@ -359,6 +390,30 @@ export default {
           window.parent.location.href = process.env.MAIN_URL_JA + '/posts/level' + level + '-1'
         }
       }
+    },
+    blasting (axis, sx, sy, tx, ty) {
+      let base = this.$refs['box-1-1'][0].getBoundingClientRect()
+      let start = this.$refs['box-' + this.getKey(sx, sy)][0].getBoundingClientRect()
+      let end = this.$refs['box-' + this.getKey(tx, ty)][0].getBoundingClientRect()
+      let diffX = end.left - start.left
+      let diffY = end.top - start.top
+      for (let i = 1; i <= 5; i++) {
+        this.blasts.push({
+          'left': (start.left - base.left) + 'px',
+          'top': (start.top - base.top) + 'px',
+          '--animation-second': (i * 0.25) + 's',
+          '--translate-x': diffX + 'px',
+          '--translate-y': diffY + 'px',
+          '--rotate': ROTATE[axis].rotate
+        })
+      }
+    },
+    blastStyle (attributes) {
+      let style = ''
+      for (let [key, value] of Object.entries(attributes)) {
+        style += key + ':' + value + ';'
+      }
+      return style
     }
   },
   mounted () {
@@ -488,6 +543,15 @@ export default {
   background-image: url("/static/bomb/enemy1.svg");
   background-size: cover;
 }
+.enemy1-down {
+  background-image: url("/static/bomb/enemy1-down.svg");
+  animation: enemy1-down-explosion 1.0s forwards;
+}
+@keyframes enemy1-down-explosion {
+  0% {transform: scale(1.0, 1.0);}
+  50% {transform: scale(1.0, 1.0);}
+  100% {transform: scale(0, 0);}
+}
 .explosion {
   background-image: url("/static/bomb/explosion.svg");
   background-size: cover;
@@ -496,7 +560,12 @@ export default {
 .explosion-bomb {
   background-image: url("/static/bomb/explosion-start.svg");
   background-size: cover;
-  animation: hurueru .1s  infinite;
+  animation: animation-explosion 1.0s forwards;
+}
+@keyframes animation-explosion {
+  0% {transform: scale(0, 0);}
+  90% {transform: scale(2.0, 2.0);}
+  100% {transform: scale(0, 0);}
 }
 @-webkit-keyframes flash {
   0% {opacity: 0;}
@@ -531,5 +600,42 @@ export default {
 }
 .modal-dialog {
   top: 10% !important;
+}
+.fire {
+  height: 2rem;
+  width: 2rem;
+  position: absolute;
+  z-index: 100;
+  animation-timing-function: linear;
+  animation: fire-animation var(--animation-second) forwards;
+}
+.fire1 {
+  animation: fire-animation 0.25s forwards;
+}
+.fire2 {
+  animation: fire-animation 0.50s forwards;
+}
+.fire3 {
+  animation: fire-animation 0.75s forwards;
+}
+.fire4 {
+  animation: fire-animation 1.0s forwards;
+}
+.fire5 {
+  animation: fire-animation 1.25s forwards;
+}
+@keyframes fire-animation {
+  0% {
+    transform: translateX(0px) translateY(0px) rotate(var(--rotate));
+    -webkit-transform: translateX(0px) translateY(0px) rotate(var(--rotate));
+  }
+  90% {
+    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
+    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
+  }
+  100% {
+    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
+    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
+  }
 }
 </style>
