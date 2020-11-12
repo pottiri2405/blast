@@ -392,9 +392,16 @@ export default {
       }
     },
     blasting (axis, sx, sy, tx, ty) {
-      let base = this.$refs['box-1-1'][0].getBoundingClientRect()
       let start = this.$refs['box-' + this.getKey(sx, sy)][0].getBoundingClientRect()
       let end = this.$refs['box-' + this.getKey(tx, ty)][0].getBoundingClientRect()
+      let base = this.$refs['box-1-1'][0].getBoundingClientRect()
+      let doc = this.$refs['box-1-1'][0].ownerDocument
+      let childWindow = doc.defaultView
+      while (window.top !== childWindow) {
+        base.top += childWindow.frameElement.getBoundingClientRect().top
+        base.left += childWindow.frameElement.getBoundingClientRect().left
+        childWindow = childWindow.parent
+      }
       let diffX = end.left - start.left
       let diffY = end.top - start.top
       for (let i = 1; i <= 5; i++) {
