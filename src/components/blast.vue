@@ -393,7 +393,7 @@ export default {
     blasting (axis, sx, sy, tx, ty) {
       let start = this.$refs['box-' + this.getKey(sx, sy)][0].getBoundingClientRect()
       let end = this.$refs['box-' + this.getKey(tx, ty)][0].getBoundingClientRect()
-      let base = this.$refs['box1-1'][0].getBoundingClientRect()
+      let base = this.$refs['box-1-1'][0].getBoundingClientRect()
       let diffX = end.left - start.left
       let diffY = end.top - start.top
       for (let i = 1; i <= 5; i++) {
