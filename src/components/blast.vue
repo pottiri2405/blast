@@ -333,7 +333,6 @@ export default {
       clearInterval(this.timer.started)
     },
     timerReset () {
-      this.timerStart = false
       clearInterval(this.timer.started)
       this.timer.duration = 0
       this.timer.began = null
@@ -394,14 +393,7 @@ export default {
     blasting (axis, sx, sy, tx, ty) {
       let start = this.$refs['box-' + this.getKey(sx, sy)][0].getBoundingClientRect()
       let end = this.$refs['box-' + this.getKey(tx, ty)][0].getBoundingClientRect()
-      let base = this.$refs['box-1-1'][0].getBoundingClientRect()
-      let doc = this.$refs['box-1-1'][0].ownerDocument
-      let childWindow = doc.defaultView
-      while (window.top !== childWindow) {
-        base.top += childWindow.frameElement.getBoundingClientRect().top
-        base.left += childWindow.frameElement.getBoundingClientRect().left
-        childWindow = childWindow.parent
-      }
+      let base = this.$refs['box1-1'][0].getBoundingClientRect()
       let diffX = end.left - start.left
       let diffY = end.top - start.top
       for (let i = 1; i <= 5; i++) {
@@ -487,14 +479,14 @@ export default {
   top: 50px;
   left:calc(50% - 50px/2);
 }
-@media screen and (max-width: 768px) {
+/* @media screen and (max-width: 768px) {
   #map {
    position: absolute;
    left: 50%;
    -webkit-transform: translate(-50%, 0);
    transform: translate(-50%, 0);
   }
-}
+} */
 .remaining {
   min-width: 1.75rem !important;
   min-height: 1.75rem !important;
@@ -615,21 +607,6 @@ export default {
   z-index: 100;
   animation-timing-function: linear;
   animation: fire-animation var(--animation-second) forwards;
-}
-.fire1 {
-  animation: fire-animation 0.25s forwards;
-}
-.fire2 {
-  animation: fire-animation 0.50s forwards;
-}
-.fire3 {
-  animation: fire-animation 0.75s forwards;
-}
-.fire4 {
-  animation: fire-animation 1.0s forwards;
-}
-.fire5 {
-  animation: fire-animation 1.25s forwards;
 }
 @keyframes fire-animation {
   0% {
