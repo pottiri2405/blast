@@ -26,7 +26,6 @@
       </b-row>
       <b-row class="mt-2">
         <b-col class="pl-0">
-          <img v-for="(f, i) in blasts" v-bind:key="'fire-1-' + i" src="/static/bomb/fire.svg" class="fire" :style="blastStyle(f)">
           <table id="map">
             <tr v-for="(chars, y) in data.map" :key="'row-' + y">
               <td border
@@ -37,7 +36,6 @@
               v-bind:class="{
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
-                'explosion-bomb': isExplosionBomb(x, y),
                 'red-bomb': (isRedBomb(x, y) && countDown > 0),
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
@@ -45,6 +43,8 @@
                 'enemy1': isEnemy1(x, y),
                 'enemy1-down': isEnemy1Down(x, y)
                 }">
+                <img v-if="isExplosionBomb(x, y)" src="/static/bomb/explosion-bomb.svg" class="explosion-bomb">
+                <img v-for="(f, i) in blastArray(x, y)" v-bind:key="'blast-1-' + i" src="/static/bomb/fire.svg" class="blast" :style="blastStyle(f)">
                 <p :ref="'box-' + x + '-' + y"></p>
               </td>
             </tr>
@@ -166,7 +166,7 @@ export default {
       countDown: 3,
       previousUrl: null,
       nextUrl: null,
-      blasts: []
+      blasts: {}
     }
   },
   methods: {
@@ -393,19 +393,54 @@ export default {
     blasting (axis, sx, sy, tx, ty) {
       let start = this.$refs['box-' + this.getKey(sx, sy)][0].getBoundingClientRect()
       let end = this.$refs['box-' + this.getKey(tx, ty)][0].getBoundingClientRect()
-      let base = this.$refs['box-1-1'][0].getBoundingClientRect()
-      let diffX = end.left - start.left
-      let diffY = end.top - start.top
-      for (let i = 1; i <= 5; i++) {
-        this.blasts.push({
-          'left': (start.left - base.left) + 'px',
-          'top': (start.top - base.top) + 'px',
-          '--animation-second': (i * 0.25) + 's',
-          '--translate-x': diffX + 'px',
-          '--translate-y': diffY + 'px',
-          '--rotate': ROTATE[axis].rotate
-        })
+      const skey = this.getKey(sx, sy)
+      if (!this.blasts[skey]) {
+        this.blasts[skey] = []
       }
+      const diffX = end.left - start.left
+      const diffY = end.top - start.top
+      let $vm = this
+      $vm.blasts[skey].push({
+        '--animation-second': '0.5s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.6s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.7s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.8s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.9s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '1.0s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })            
+    },
+    blastArray (x, y) {
+      const key = this.getKey(x, y)
+      if (!this.blasts[key]) return []
+      return this.blasts[key]
     },
     blastStyle (attributes) {
       let style = ''
@@ -500,8 +535,8 @@ export default {
   min-height: 1.75rem !important;
   width: 1.75rem !important;
   height: 1.75rem !important;
-  text-align: center !important;
-  vertical-align: middle !important;
+  text-align: left !important;
+  vertical-align: top !important;
   border-top: 1px solid #000000;
   border-left: 1px solid #000000;
   padding-left: 0px !important;
@@ -544,27 +579,46 @@ export default {
 }
 .enemy1-down {
   background-image: url("/static/bomb/enemy1-down.svg");
-  animation: enemy1-down-explosion 1.0s forwards;
+  animation: enemy1-down-explosion 1.5s forwards;
 }
 @keyframes enemy1-down-explosion {
   0% {transform: scale(1.0, 1.0);}
   50% {transform: scale(1.0, 1.0);}
   100% {transform: scale(0, 0);}
 }
-.explosion {
-  background-image: url("/static/bomb/explosion.svg");
-  background-size: cover;
-  animation: hurueru .1s  infinite;
-}
 .explosion-bomb {
-  background-image: url("/static/bomb/explosion-start.svg");
-  background-size: cover;
-  animation: animation-explosion 1.0s forwards;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  position: absolute;
+  z-index: 100;
+  animation: explosion-bomb-animation 0.5s forwards;
 }
-@keyframes animation-explosion {
+@keyframes explosion-bomb-animation {
   0% {transform: scale(0, 0);}
   90% {transform: scale(2.0, 2.0);}
   100% {transform: scale(0, 0);}
+}
+.blast {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  position: absolute;
+  z-index: 100;
+  animation-timing-function: linear;
+  animation: blast-animation var(--animation-second) forwards;
+}
+@keyframes blast-animation {
+  0% {
+    transform: translateX(0px) translateY(0px) rotate(var(--rotate));
+    -webkit-transform: translateX(0px) translateY(0px) rotate(var(--rotate));
+  }
+  90% {
+    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
+    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
+  }
+  100% {
+    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
+    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
+  }
 }
 @-webkit-keyframes flash {
   0% {opacity: 0;}
@@ -599,27 +653,5 @@ export default {
 }
 .modal-dialog {
   top: 10% !important;
-}
-.fire {
-  height: 2rem;
-  width: 2rem;
-  position: absolute;
-  z-index: 100;
-  animation-timing-function: linear;
-  animation: fire-animation var(--animation-second) forwards;
-}
-@keyframes fire-animation {
-  0% {
-    transform: translateX(0px) translateY(0px) rotate(var(--rotate));
-    -webkit-transform: translateX(0px) translateY(0px) rotate(var(--rotate));
-  }
-  90% {
-    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
-    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
-  }
-  100% {
-    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
-    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
-  }
 }
 </style>
