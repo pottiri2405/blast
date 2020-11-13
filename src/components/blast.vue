@@ -1,6 +1,7 @@
 <template>
   <div id="stage">
     <img src="/static/bomb/fire.svg" style="display: none;">
+    <img src="/static/bomb/explosion-bomb.svg" style="display: none;">
     <b-spinner v-show="init===true" id="init-loading" label="Large Spinner"></b-spinner>
     <b-container v-show="init===false">
       <b-row class="mt-2">
