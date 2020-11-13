@@ -1,5 +1,6 @@
 <template>
   <div id="stage">
+    <img src="/static/bomb/explosion-bomb.svg" style="display: none;">
     <b-spinner v-show="init===true" id="init-loading" label="Large Spinner"></b-spinner>
     <b-container v-show="init===false">
       <b-row class="mt-2">
@@ -514,14 +515,14 @@ export default {
   top: 50px;
   left:calc(50% - 50px/2);
 }
-/* @media screen and (max-width: 768px) {
+@media screen and (max-width: 768px) {
   #map {
    position: absolute;
    left: 50%;
    -webkit-transform: translate(-50%, 0);
    transform: translate(-50%, 0);
   }
-} */
+}
 .remaining {
   min-width: 1.75rem !important;
   min-height: 1.75rem !important;
