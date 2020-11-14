@@ -18,10 +18,7 @@
         <b-col>
           <table>
             <tr>
-              <td v-for="n in life.stock" v-bind:key="'bomb-stock-' + n" class="stock stock-bomb">
-                &nbsp;
-              </td>
-              <td class="stock"></td>
+              <td class="stock stock-bomb" v-bind:class="{'up': (life.stock === 0)}">&nbsp;</td>
             </tr>
           </table>
         </b-col>
@@ -38,7 +35,8 @@
               v-bind:class="{
                 'box-row-last': isLast(y, data.size),
                 'box-col-last': isLast(x, data.size),
-                'red-bomb': (isRedBomb(x, y) && countDown > 0),
+                'red-bomb-down': (isRedBomb(x, y) && countDown === 999),
+                'red-bomb': (isRedBomb(x, y) && countDown > 0 && countDown < 999),
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
                 'breakable1': isBreakable1(x, y),
@@ -191,8 +189,10 @@ export default {
           $vm.life.stock++
           return
         }
-        $vm.bomb[key] = {x: x, y: y}
         $vm.life.stock--
+        await $vm.sleep(500)
+        $vm.bomb[key] = {x: x, y: y}
+        await $vm.sleep(500)
         if ($vm.life.stock === 0) {
           $vm.timerStop()
           $vm.countDown = 3
@@ -207,7 +207,14 @@ export default {
             delete $vm.bomb[key]
           }
           await $vm.sleep(3000)
-          if (parseInt($vm.data.installations['black-bomb']) <= 0 && parseInt($vm.data.installations.breakable1) <= 0) {
+          let complete  = true
+          for (let [key, value] of Object.entries($vm.data.installations)) {
+            if (parseInt(value) > 0) {
+              complete = false
+              break
+            }
+          }          
+          if (complete) {
             $vm.$refs['modal-complete'].show()
           } else {
             $vm.$refs['modal-failure'].show()
@@ -356,7 +363,11 @@ export default {
         default:
           break
       }
-      if ((y < 1 || y > Object.keys(this.data.map).length) || (x < 1 || x > Object.keys(this.data.map[y]).length)) {
+      if ((y < 1 || y > Object.keys(this.data.map).length) ||
+      (x < 1 || x > Object.keys(this.data.map[y]).length) ||
+      this.isRedBomb(x, y) ||
+      this.data.map[y][x] !== 'none'
+      ) {
         enemy.mode = (enemy.mode === 'default') ? 'reverse' : 'default'
         return false
       }
@@ -578,11 +589,8 @@ export default {
   font-size: 4rem;
   z-index: 999;
   position: absolute;
-  /* position: absolute;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, 50%);
-  transform: translate(-50%, 50%); */
+  left: -0.5rem;
+  top: -4rem;
 }
 @media screen and (max-width: 768px) {
   #map {
@@ -626,6 +634,34 @@ export default {
 }
 .box-col-last {
   border-right: 1px solid #000000;
+}
+.up {
+  animation: up-animation 0.5s forwards;
+}
+@keyframes up-animation {
+  0% {
+    transform: translateY(0px);
+    -webkit-transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-100px);
+    -webkit-transform: translateY(-100px);
+  }
+}
+.red-bomb-down {
+  background-image: url("/static/bomb/red-bomb.svg");
+  background-size: cover;
+  animation: down-animation 0.5s forwards;
+}
+@keyframes down-animation {
+  0% {
+    transform: translateY(-1000px);
+    -webkit-transform: translateY(-500px);
+  }
+  100% {
+    transform: translateY(0px);
+    -webkit-transform: translateY(0px);
+  }
 }
 .red-bomb {
   background-image: url("/static/bomb/red-bomb.svg");
