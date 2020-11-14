@@ -207,13 +207,14 @@ export default {
             delete $vm.bomb[key]
           }
           await $vm.sleep(3000)
-          let complete  = true
+          let complete = true
           for (let [key, value] of Object.entries($vm.data.installations)) {
+            $vm.logging(key + '=' + value)
             if (parseInt(value) > 0) {
               complete = false
               break
             }
-          }          
+          }
           if (complete) {
             $vm.$refs['modal-complete'].show()
           } else {
@@ -248,10 +249,10 @@ export default {
           }
           if (this.isEnemyStop(mx, my) || this.isEnemyVertical(mx, my)) {
             this.setExplosion(mx, my, false)
+            this.data.installations[this.data.map[my][mx]]--
             this.data.map[my][mx] = 'enemy-down'
             tx = mx
             ty = my
-            this.data.installations.enety1--
           }
           if (this.isBlackBomb(mx, my)) {
             if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
