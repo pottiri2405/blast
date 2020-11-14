@@ -179,6 +179,9 @@ export default {
     },
     setRedBomb (x, y) {
       let $vm = this
+      if ($vm.life.stock <= 0) {
+        return
+      }
       return async function (event) {
         // 空白以外なら爆弾設置不可
         if ($vm.data.map[y][x] !== 'none') return
@@ -193,7 +196,7 @@ export default {
         await $vm.sleep(500)
         $vm.bomb[key] = {x: x, y: y}
         await $vm.sleep(500)
-        if ($vm.life.stock === 0) {
+        if ($vm.life.stock <= 0) {
           $vm.timerStop()
           $vm.countDown = 3
           await $vm.sleep(1000)
