@@ -18,10 +18,10 @@
         <b-col>
           <table>
             <tr>
-              <td v-for="n in life.remaining" v-bind:key="'life-remaining-' + n" class="remaining red-bomb">
+              <td v-for="n in life.stock" v-bind:key="'bomb-stock-' + n" class="stock stock-bomb">
                 &nbsp;
               </td>
-              <td class="remaining"></td>
+              <td class="stock"></td>
             </tr>
           </table>
         </b-col>
@@ -42,9 +42,11 @@
                 'black-bomb': isBlackBomb(x, y),
                 'unbreakable': isUnbreakable(x, y),
                 'breakable1': isBreakable1(x, y),
-                'enemy1': isEnemy1(x, y),
-                'enemy1-down': isEnemy1Down(x, y)
+                'enemy-stop': isEnemyStop(x, y),
+                'enemy-vertical': isEnemyVertical(x, y),
+                'enemy-down': isEnemyDown(x, y)
                 }">
+                <p v-show="isRedBomb(x, y) && countDown > 0 && countDown < 999" id="count-down">{{ countDown }}</p>
                 <img v-if="isExplosionBomb(x, y)" src="/static/bomb/explosion-bomb.svg" class="explosion-bomb">
                 <img v-for="(f, i) in blastArray(x, y)" v-bind:key="'blast-1-' + i" src="/static/bomb/fire.svg" class="blast" :style="blastStyle(f)">
                 <p :ref="'box-' + x + '-' + y"></p>
@@ -57,9 +59,6 @@
     <b-modal ref="modal-start" size="sm" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
       <p v-html="$t('message.blast_start_text')"></p>
       <b-button pill block variant="primary" v-touch="gameStart">{{ $t("message.start")}}</b-button>
-    </b-modal>
-    <b-modal ref="modal-count-down" size="sm" hide-header hide-footer no-close-on-esc no-close-on-backdrop>
-      <h2 class="text-center">{{ countDown }}</h2>
     </b-modal>
     <b-modal ref="modal-complete" size="md" hide-header hide-footer>
       <b-container>
@@ -153,6 +152,9 @@ const ROTATE = {
   'n': {rotate: '180deg'},
   'nw': {rotate: '135deg'}
 }
+const ENEMIES = {
+  'vertical': {'default': 's', 'reverse': 'n'}
+}
 
 export default {
   data () {
@@ -161,20 +163,21 @@ export default {
       language: null,
       timer: {time: '00:00:00.000', began: null, stopped: null, duration: 0, started: null, running: false},
       data: {map: {}},
-      life: {remaining: 0, max: 100},
+      life: {stock: 0, max: 100},
       bomb: {},
       explosion: {},
       buruburu: {},
-      countDown: 3,
+      countDown: 999,
       previousUrl: null,
       nextUrl: null,
-      blasts: {}
+      blasts: {},
+      enemies: []
     }
   },
   methods: {
     clear () {
       this.bomb.length = 0
-      this.life.remaining = this.life.max
+      this.life.stock = this.life.max
     },
     setRedBomb (x, y) {
       let $vm = this
@@ -185,22 +188,20 @@ export default {
         let key = $vm.getKey(x, y)
         if ($vm.bomb[key]) {
           delete $vm.bomb[key]
-          $vm.life.remaining++
+          $vm.life.stock++
           return
         }
         $vm.bomb[key] = {x: x, y: y}
-        $vm.life.remaining--
-        if ($vm.life.remaining === 0) {
+        $vm.life.stock--
+        if ($vm.life.stock === 0) {
           $vm.timerStop()
-          $vm.$refs['modal-count-down'].show()
+          $vm.countDown = 3
           await $vm.sleep(1000)
           $vm.countDown--
           await $vm.sleep(1000)
           $vm.countDown--
           await $vm.sleep(1000)
           $vm.countDown--
-          $vm.$refs['modal-count-down'].hide()
-          await $vm.sleep(250)
           for (let k of Object.keys($vm.bomb)) {
             await $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
             delete $vm.bomb[key]
@@ -238,9 +239,9 @@ export default {
             this.data.installations.breakable1--
             break
           }
-          if (this.isEnemy1(mx, my)) {
+          if (this.isEnemyStop(mx, my) || this.isEnemyVertical(mx, my)) {
             this.setExplosion(mx, my, false)
-            this.data.map[my][mx] = 'enemy1-down'
+            this.data.map[my][mx] = 'enemy-down'
             tx = mx
             ty = my
             this.data.installations.enety1--
@@ -279,11 +280,14 @@ export default {
     isBreakable1 (x, y) {
       return (this.data.map[y][x] === 'breakable1' && this.isExplosion(x, y) === false)
     },
-    isEnemy1 (x, y) {
-      return (this.data.map[y][x] === 'enemy1')
+    isEnemyStop (x, y) {
+      return (this.data.map[y][x] === 'enemy-stop')
     },
-    isEnemy1Down (x, y) {
-      return (this.data.map[y][x] === 'enemy1-down')
+    isEnemyVertical (x, y) {
+      return (this.data.map[y][x] === 'enemy-vertical')
+    },
+    isEnemyDown (x, y) {
+      return (this.data.map[y][x] === 'enemy-down')
     },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
@@ -316,6 +320,51 @@ export default {
     gameStart () {
       this.$refs['modal-start'].hide()
       this.timerStart()
+      let $vm = this
+      setInterval(function () {
+        if ($vm.countDown <= 0) return
+        for (let e of $vm.enemies) {
+          if (e.type === 'stop') continue
+          if (!$vm.moveEnemy(e)) {
+            $vm.moveEnemy(e)
+          }
+        }
+      }, 1000)
+    },
+    moveEnemy (enemy) {
+      let x = enemy.x
+      let y = enemy.y
+      switch ((enemy.mode === 'default') ? enemy.default : enemy.reverse) {
+        case 'e':
+          break
+        case 'ne':
+          break
+        case 'n':
+          y--
+          break
+        case 'nw':
+          break
+        case 'w':
+          break
+        case 'sw':
+          break
+        case 's':
+          y++
+          break
+        case 'se':
+          break
+        default:
+          break
+      }
+      if ((y < 1 || y > Object.keys(this.data.map).length) || (x < 1 || x > Object.keys(this.data.map[y]).length)) {
+        enemy.mode = (enemy.mode === 'default') ? 'reverse' : 'default'
+        return false
+      }
+      this.data.map[enemy.y][enemy.x] = 'none'
+      this.data.map[y][x] = 'enemy-' + enemy.type
+      enemy.x = x
+      enemy.y = y
+      return true
     },
     timerStart () {
       if (this.timer.running !== false) return
@@ -437,7 +486,7 @@ export default {
         '--translate-x': diffX + 'px',
         '--translate-y': diffY + 'px',
         '--rotate': ROTATE[axis].rotate
-      })            
+      })
     },
     blastArray (x, y) {
       const key = this.getKey(x, y)
@@ -462,8 +511,17 @@ export default {
       .then(response => {
         $vm.logging(response)
         $vm.data = response.data
-        $vm.life.remaining = $vm.data.limit
+        $vm.life.stock = $vm.data.limit
         $vm.life.max = $vm.data.limit
+        for (let y in $vm.data.map) {
+          for (let x in $vm.data.map[y]) {
+            for (let [key, e] of Object.entries(ENEMIES)) {
+              if ($vm.data.map[y][x] === 'enemy-' + key) {
+                $vm.enemies.push({x: x, y: y, type: key, mode: 'default', default: e['default'], reverse: e['reverse']})
+              }
+            }
+          }
+        }
         $vm.init = false
         $vm.$refs['modal-start'].show()
       })
@@ -516,6 +574,16 @@ export default {
   top: 50px;
   left:calc(50% - 50px/2);
 }
+#count-down {
+  font-size: 4rem;
+  z-index: 999;
+  position: absolute;
+  /* position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, 50%);
+  transform: translate(-50%, 50%); */
+}
 @media screen and (max-width: 768px) {
   #map {
    position: absolute;
@@ -524,7 +592,7 @@ export default {
    transform: translate(-50%, 0);
   }
 }
-.remaining {
+.stock {
   min-width: 1.75rem !important;
   min-height: 1.75rem !important;
   width: 1.75rem !important;
@@ -562,6 +630,11 @@ export default {
 .red-bomb {
   background-image: url("/static/bomb/red-bomb.svg");
   background-size: cover;
+  animation: scale-animation 1.0s infinite;
+}
+.stock-bomb {
+  background-image: url("/static/bomb/red-bomb.svg");
+  background-size: cover;
 }
 .black-bomb {
   background-image: url("/static/bomb/black-bomb.svg");
@@ -575,15 +648,26 @@ export default {
   background-image: url("/static/bomb/breakable1.svg");
   background-size: cover;
 }
-.enemy1 {
-  background-image: url("/static/bomb/enemy1.svg");
+.enemy-stop {
+  background-image: url("/static/bomb/enemy-stop.svg");
   background-size: cover;
+  animation: scale-animation 1.0s infinite;
 }
-.enemy1-down {
-  background-image: url("/static/bomb/enemy1-down.svg");
-  animation: enemy1-down-explosion 1.5s forwards;
+.enemy-vertical {
+  background-image: url("/static/bomb/enemy-vertical.svg");
+  background-size: cover;
+  animation: scale-animation 1.0s infinite;
 }
-@keyframes enemy1-down-explosion {
+@keyframes scale-animation {
+  0% {transform: scale(1.0, 1.0);}
+  50% {transform: scale(0.75, 0.75);}
+  100% {transform: scale(1.0, 1.0);}
+}
+.enemy-down {
+  background-image: url("/static/bomb/enemy-down.svg");
+  animation: enemy-down-explosion 1.5s forwards;
+}
+@keyframes enemy-down-explosion {
   0% {transform: scale(1.0, 1.0);}
   50% {transform: scale(1.0, 1.0);}
   100% {transform: scale(0, 0);}
