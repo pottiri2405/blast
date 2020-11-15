@@ -201,7 +201,7 @@ export default {
           await $vm.sleep(3000)
           let complete = true
           for (let [key, value] of Object.entries($vm.data.installations)) {
-            $vm.logging(key + '=' + value)
+            if (key === 'unbreakable') continue
             if (parseInt(value) > 0) {
               complete = false
               break
@@ -217,6 +217,7 @@ export default {
     },
     async fire (x, y) {
       this.setExplosion(x, y, true)
+      this.data.map[y][x] = 'none'
       let blackBombs = []
       for (let d of DIRECTIONS) {
         let sx = parseInt(x)
@@ -249,7 +250,6 @@ export default {
           }
           if (this.isBlackBomb(mx, my)) {
             if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
-            this.setBuruBuru(mx, my)
             tx = mx
             ty = my
             this.data.installations['black-bomb']--
@@ -299,7 +299,7 @@ export default {
       return Object.keys(this.bomb).includes(this.getKey(x, y))
     },
     isBlackBomb (x, y) {
-      return (this.data.map[y][x] === 'black-bomb' && this.isExplosion(x, y) === false && this.isBuruBuru(x, y) === false)
+      return (this.data.map[y][x] === 'black-bomb')
     },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
