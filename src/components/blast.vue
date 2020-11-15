@@ -32,18 +32,7 @@
               :key="'box' + x + '-' + y"
               v-touch:start="setRedBomb(x, y)"
               class="box-base"
-              v-bind:class="{
-                'box-row-last': isLast(y, data.size),
-                'box-col-last': isLast(x, data.size),
-                'red-bomb-down': (isRedBomb(x, y) && countDown === 999),
-                'red-bomb': (isRedBomb(x, y) && countDown > 0 && countDown < 999),
-                'black-bomb': isBlackBomb(x, y),
-                'unbreakable': isUnbreakable(x, y),
-                'breakable1': isBreakable1(x, y),
-                'enemy-stop': isEnemyStop(x, y),
-                'enemy-vertical': isEnemyVertical(x, y),
-                'enemy-down': isEnemyDown(x, y)
-                }">
+              :class="boxClasses(x, y)">
                 <p v-show="isRedBomb(x, y) && countDown > 0 && countDown < 999" id="count-down">{{ countDown }}</p>
                 <img v-if="isExplosionBomb(x, y)" src="/static/bomb/explosion-bomb.svg" class="explosion-bomb">
                 <img v-for="(f, i) in blastArray(x, y)" v-bind:key="'blast-1-' + i" src="/static/bomb/fire.svg" class="blast" :style="blastStyle(f)">
@@ -245,9 +234,10 @@ export default {
           if (this.isUnbreakable(mx, my)) break
           if (this.isBreakable1(mx, my)) {
             this.setExplosion(mx, my, false)
+            this.data.installations[this.data.map[my][mx]]--
+            this.data.map[my][mx] = 'none'
             tx = mx
             ty = my
-            this.data.installations.breakable1--
             break
           }
           if (this.isEnemyStop(mx, my) || this.isEnemyVertical(mx, my)) {
@@ -279,6 +269,32 @@ export default {
         await this.fire(xy[0], xy[1])
       }
     },
+    boxClasses (x, y) {
+      let array = []
+      if (this.isLast(y, this.data.size)) array.push('box-row-last')
+      if (this.isLast(x, this.data.size)) array.push('box-col-last')
+      const idx = parseInt(x) + ((parseInt(y) - 1) * this.data.size)
+      if (this.data.size % 2 === 1) {
+        if ((idx % 2) === 1) array.push('box-pattern2')
+      } else {
+        if (y % 2 === 1) {
+          if ((idx % 2) === 1) array.push('box-pattern2')
+        } else {
+          if ((idx % 2) === 0) array.push('box-pattern2')
+        }
+      }
+      if (this.isRedBomb(x, y)) {
+        if (this.countDown === 999) array.push('red-bomb-down')
+        if (this.countDown > 0 && this.countDown < 999) array.push('red-bomb-scale')
+      } else if (this.isBlackBomb(x, y)) {
+        array.push('black-bomb')
+      } else if (this.isBreakable1(x, y)) {
+        array.push('breakable1')
+      } else {
+        array.push(this.data.map[y][x])
+      }
+      return array.join(' ')
+    },
     isRedBomb (x, y) {
       return Object.keys(this.bomb).includes(this.getKey(x, y))
     },
@@ -289,7 +305,7 @@ export default {
       return (this.data.map[y][x] === 'unbreakable')
     },
     isBreakable1 (x, y) {
-      return (this.data.map[y][x] === 'breakable1' && this.isExplosion(x, y) === false)
+      return (this.data.map[y][x] === 'breakable1')
     },
     isEnemyStop (x, y) {
       return (this.data.map[y][x] === 'enemy-stop')
@@ -635,6 +651,9 @@ export default {
 .box-col-last {
   border-right: 1px solid #000000;
 }
+.box-pattern2 {
+  background-color: #f5f5f5;
+}
 .up {
   animation: up-animation 0.5s forwards;
 }
@@ -663,7 +682,7 @@ export default {
     -webkit-transform: translateY(0px);
   }
 }
-.red-bomb {
+.red-bomb-scale {
   background-image: url("/static/bomb/red-bomb.svg");
   background-size: cover;
   animation: scale-animation 1.0s infinite;
