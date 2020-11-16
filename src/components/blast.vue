@@ -275,11 +275,15 @@ export default {
       if (this.isLast(x, this.data.size)) array.push('box-col-last')
       const idx = parseInt(x) + ((parseInt(y) - 1) * this.data.size)
       if (this.data.size % 2 === 1) {
+        // マス目のサイズが奇数の場合
         if ((idx % 2) === 1) array.push('box-pattern2')
       } else {
+        // マス目のサイズが偶数の場合
         if (y % 2 === 1) {
+          // 奇数行
           if ((idx % 2) === 1) array.push('box-pattern2')
         } else {
+          // 偶数行
           if ((idx % 2) === 0) array.push('box-pattern2')
         }
       }
