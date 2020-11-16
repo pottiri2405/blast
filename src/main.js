@@ -7,6 +7,7 @@ import axios from 'axios' // add by POTTIRI
 import VueAxios from 'vue-axios' // add by POTTIRI
 import VueI18n from 'vue-i18n' // add by POTTIRI
 import gv from './mixins/global' // add by POTTIRI
+import './assets/css/blast.css' // add by POTTIRI
 
 Vue.config.productionTip = false
 Vue.use(VueAxios, axios) // add by POTTIRI
