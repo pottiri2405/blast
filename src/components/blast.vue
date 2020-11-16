@@ -365,8 +365,7 @@ export default {
     moveEnemy (enemy) {
       let x = enemy.x
       let y = enemy.y
-      const mode = (enemy.mode === 'default') ? enemy.default : enemy.reverse
-      switch (mode) {
+      switch ((enemy.mode === 'default') ? enemy.default : enemy.reverse) {
         case 'e':
           break
         case 'ne':
@@ -397,7 +396,7 @@ export default {
         return false
       }
       this.data.map[enemy.y][enemy.x] = 'none'
-      this.data.map[y][x] = 'enemy-' + enemy.type + '-' + mode
+      this.data.map[y][x] = 'enemy-' + enemy.type
       enemy.x = x
       enemy.y = y
       return true
@@ -597,3 +596,207 @@ export default {
   }
 }
 </script>
+<style>
+#init-loading {
+  font-size: xx-large;
+  position: fixed;
+  height: 50px;
+  width: 50px;
+  top: 50px;
+  left:calc(50% - 50px/2);
+}
+#count-down {
+  font-size: 4rem;
+  z-index: 999;
+  position: absolute;
+  left: -0.5rem;
+  top: -4rem;
+}
+@media screen and (max-width: 768px) {
+  #map {
+   position: absolute;
+   left: 50%;
+   -webkit-transform: translate(-50%, 0);
+   transform: translate(-50%, 0);
+  }
+}
+.stock {
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  padding: 0px;
+}
+.box-base {
+  cursor: pointer;
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  text-align: left !important;
+  vertical-align: top !important;
+  border-top: 1px solid #000000;
+  border-left: 1px solid #000000;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  color: #000000;
+  padding: 0px;
+}
+.box-large2 {
+  font-size: x-large;
+  min-width: 2.25rem !important;
+  min-height: 2.25rem !important;
+  max-width: 2.25rem !important;
+  max-height: 2.25rem !important;
+}
+.box-row-last {
+  border-bottom: 1px solid #000000;
+}
+.box-col-last {
+  border-right: 1px solid #000000;
+}
+.box-pattern2 {
+  background-color: #f5f5f5;
+}
+.up {
+  animation: up-animation 0.5s forwards;
+}
+@keyframes up-animation {
+  0% {
+    transform: translateY(0px);
+    -webkit-transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-100px);
+    -webkit-transform: translateY(-100px);
+  }
+}
+.red-bomb-down {
+  background-image: url("/static/bomb/red-bomb.svg");
+  background-size: cover;
+  animation: down-animation 0.5s forwards;
+}
+@keyframes down-animation {
+  0% {
+    transform: translateY(-1000px);
+    -webkit-transform: translateY(-500px);
+  }
+  100% {
+    transform: translateY(0px);
+    -webkit-transform: translateY(0px);
+  }
+}
+.red-bomb-scale {
+  background-image: url("/static/bomb/red-bomb.svg");
+  background-size: cover;
+  animation: scale-animation 1.0s infinite;
+}
+.stock-bomb {
+  background-image: url("/static/bomb/red-bomb.svg");
+  background-size: cover;
+}
+.black-bomb {
+  background-image: url("/static/bomb/black-bomb.svg");
+  background-size: cover;
+}
+.unbreakable {
+  background-image: url("/static/bomb/unbreakable.svg");
+  background-size: cover;
+}
+.breakable1 {
+  background-image: url("/static/bomb/breakable1.svg");
+  background-size: cover;
+}
+.enemy-stop {
+  background-image: url("/static/bomb/enemy-stop.svg");
+  background-size: cover;
+  animation: scale-animation 1.0s infinite;
+}
+.enemy-vertical {
+  background-image: url("/static/bomb/enemy-vertical.svg");
+  background-size: cover;
+  animation: scale-animation 1.0s infinite;
+}
+@keyframes scale-animation {
+  0% {transform: scale(1.0, 1.0);}
+  50% {transform: scale(0.75, 0.75);}
+  100% {transform: scale(1.0, 1.0);}
+}
+.enemy-down {
+  background-image: url("/static/bomb/enemy-down.svg");
+  animation: enemy-down-explosion 1.5s forwards;
+}
+@keyframes enemy-down-explosion {
+  0% {transform: scale(1.0, 1.0);}
+  50% {transform: scale(1.0, 1.0);}
+  100% {transform: scale(0, 0);}
+}
+.explosion-bomb {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  position: absolute;
+  z-index: 100;
+  animation: explosion-bomb-animation 0.5s forwards;
+}
+@keyframes explosion-bomb-animation {
+  0% {transform: scale(0, 0);}
+  90% {transform: scale(2.0, 2.0);}
+  100% {transform: scale(0, 0);}
+}
+.blast {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  position: absolute;
+  z-index: 100;
+  animation-timing-function: linear;
+  animation: blast-animation var(--animation-second) forwards;
+}
+@keyframes blast-animation {
+  0% {
+    transform: translateX(0px) translateY(0px) rotate(var(--rotate));
+    -webkit-transform: translateX(0px) translateY(0px) rotate(var(--rotate));
+  }
+  90% {
+    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
+    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate));
+  }
+  100% {
+    transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
+    -webkit-transform: translateX(var(--translate-x)) translateY(var(--translate-y)) rotate(var(--rotate)) scale(0, 0);
+  }
+}
+@-webkit-keyframes flash {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+@keyframes flash {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+#timer {
+  font-family: 'Share Tech Mono', sans-serif;
+  font-size: x-large;
+  max-width: 11.75rem !important;
+  width: 11.75rem !important;
+  padding: 0px;
+  padding-top: 0.25rem;
+  /* border-radius: 50rem; */
+}
+.buruburu {
+  animation: hurueru .1s  infinite;
+}
+@keyframes hurueru {
+  0% {transform: translate(0px, 0px) rotateZ(0deg)}
+  25% {transform: translate(2px, 2px) rotateZ(1deg)}
+  50% {transform: translate(0px, 2px) rotateZ(0deg)}
+  75% {transform: translate(2px, 0px) rotateZ(-1deg)}
+  100% {transform: translate(0px, 0px) rotateZ(0deg)}
+}
+.img-small {
+  height: 2rem;
+  width: 2rem;
+}
+.modal-dialog {
+  top: 10% !important;
+}
+</style>
