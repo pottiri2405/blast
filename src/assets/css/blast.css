@@ -109,12 +109,21 @@
   background-size: cover;
 }
 .enemy-stop {
-  background-image: url("/static/bomb/enemy-stop.svg");
+  background-image: url("/static/bomb/enemy-purple.svg");
   background-size: cover;
   animation: scale-animation 1.0s infinite;
 }
-.enemy-vertical {
-  background-image: url("/static/bomb/enemy-vertical.svg");
+.enemy-vertical,
+.enemy-n,
+.enemy-s {
+  background-image: url("/static/bomb/enemy-blue.svg");
+  background-size: cover;
+  animation: scale-animation 0.9s infinite;
+}
+.enemy-horizontal,
+.enemy-e,
+.enemy-w {
+  background-image: url("/static/bomb/enemy-blue.svg");
   background-size: cover;
   animation: scale-animation 1.0s infinite;
 }
@@ -122,26 +131,6 @@
   0% {transform: scale(1.0, 1.0);}
   50% {transform: scale(0.75, 0.75);}
   100% {transform: scale(1.0, 1.0);}
-}
-.enemy-vertical-n {
-  background-image: url("/static/bomb/enemy-vertical.svg");
-  background-size: cover;
-  animation: enemy-vertical-n-animation 1.0s infinite;
-}
-@keyframes enemy-vertical-n-animation {
-  0% {transform: translateY(1.75rem) scale(1.0, 1.0);}
-  50% {transform: translateY(0.825rem) scale(0.75, 0.75);}
-  100% {transform: translateY(0) scale(1.0, 1.0);}
-}
-.enemy-vertical-s {
-  background-image: url("/static/bomb/enemy-vertical.svg");
-  background-size: cover;
-  animation: enemy-vertical-s-animation 1.0s infinite;
-}
-@keyframes enemy-vertical-s-animation {
-  0% {transform: translateY(-1.75rem)  scale(1.0, 1.0);}
-  50% {transform: translateY(-0.825rem) scale(0.75, 0.75);}
-  100% {transform: translateY(0) scale(1.0, 1.0);}
 }
 .enemy-down {
   background-image: url("/static/bomb/enemy-down.svg");

@@ -140,7 +140,12 @@ const ROTATE = {
   'nw': {rotate: '135deg'}
 }
 const ENEMIES = {
-  'vertical': {'default': 's', 'reverse': 'n'}
+  'vertical': {'default': 's', 'reverse': 'n'},
+  'n': {'default': 'n', 'reverse': 's'},
+  's': {'default': 's', 'reverse': 'n'},
+  'e': {'default': 'e', 'reverse': 'w'},
+  'w': {'default': 'w', 'reverse': 'e'}
+
 }
 
 export default {
@@ -241,7 +246,7 @@ export default {
             ty = my
             break
           }
-          if (this.isEnemyStop(mx, my) || this.isEnemyVertical(mx, my)) {
+          if (this.isEnemy(mx, my)) {
             this.setExplosion(mx, my, false)
             this.data.installations[this.data.map[my][mx]]--
             this.data.map[my][mx] = 'enemy-down'
@@ -311,11 +316,8 @@ export default {
     isBreakable1 (x, y) {
       return (this.data.map[y][x] === 'breakable1')
     },
-    isEnemyStop (x, y) {
-      return (this.data.map[y][x] === 'enemy-stop')
-    },
-    isEnemyVertical (x, y) {
-      return (this.data.map[y][x] === 'enemy-vertical')
+    isEnemy (x, y) {
+      return (this.data.map[y][x].startsWith('enemy-'))
     },
     isEnemyDown (x, y) {
       return (this.data.map[y][x] === 'enemy-down')
@@ -368,6 +370,7 @@ export default {
       const mode = (enemy.mode === 'default') ? enemy.default : enemy.reverse
       switch (mode) {
         case 'e':
+          x++
           break
         case 'ne':
           break
@@ -377,6 +380,7 @@ export default {
         case 'nw':
           break
         case 'w':
+          x--
           break
         case 'sw':
           break
@@ -397,7 +401,7 @@ export default {
         return false
       }
       this.data.map[enemy.y][enemy.x] = 'none'
-      this.data.map[y][x] = 'enemy-' + enemy.type + '-' + mode
+      this.data.map[y][x] = 'enemy-' + enemy.type
       enemy.x = x
       enemy.y = y
       return true
