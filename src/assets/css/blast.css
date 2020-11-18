@@ -99,6 +99,15 @@
 .black-bomb {
   background-image: url("/static/bomb/black-bomb.svg");
   background-size: cover;
+  animation: scale-animation 1.0s infinite;
+}
+.move-bomb-n,
+.move-bomb-s,
+.move-bomb-e,
+.move-bomb-w {
+  background-image: url("/static/bomb/blue-bomb.svg");
+  background-size: cover;
+  animation: scale-animation 1.0s infinite;
 }
 .unbreakable {
   background-image: url("/static/bomb/unbreakable.svg");

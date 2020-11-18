@@ -145,7 +145,12 @@ const ENEMIES = {
   's': {'default': 's', 'reverse': 'n'},
   'e': {'default': 'e', 'reverse': 'w'},
   'w': {'default': 'w', 'reverse': 'e'}
-
+}
+const MOVE_BOMBS = {
+  'n': {'default': 'n', 'reverse': 's'},
+  's': {'default': 's', 'reverse': 'n'},
+  'e': {'default': 'e', 'reverse': 'w'},
+  'w': {'default': 'w', 'reverse': 'e'}
 }
 
 export default {
@@ -163,7 +168,8 @@ export default {
       previousUrl: null,
       nextUrl: null,
       blasts: {},
-      enemies: []
+      enemies: [],
+      moveBombs: []
     }
   },
   methods: {
@@ -223,7 +229,7 @@ export default {
     async fire (x, y) {
       this.setExplosion(x, y, true)
       this.data.map[y][x] = 'none'
-      let blackBombs = []
+      let nextBombs = []
       for (let d of DIRECTIONS) {
         let sx = parseInt(x)
         let sy = parseInt(y)
@@ -253,11 +259,11 @@ export default {
             tx = mx
             ty = my
           }
-          if (this.isBlackBomb(mx, my)) {
-            if (!blackBombs.includes(mkey)) blackBombs.push(mkey)
+          if (this.isBlackBomb(mx, my) || this.isMoveBomb(mx, my)) {
+            if (!nextBombs.includes(mkey)) nextBombs.push(mkey)
             tx = mx
             ty = my
-            this.data.installations['black-bomb']--
+            this.data.installations[this.data.map[my][mx]]--
             continue
           }
           this.setExplosion(tx, ty, false)
@@ -269,7 +275,7 @@ export default {
         }
       }
       this.buruburu = {}
-      for (let k of blackBombs) {
+      for (let k of nextBombs) {
         let xy = k.split('-')
         await this.fire(xy[0], xy[1])
       }
@@ -309,6 +315,9 @@ export default {
     },
     isBlackBomb (x, y) {
       return (this.data.map[y][x] === 'black-bomb')
+    },
+    isMoveBomb (x, y) {
+      return (this.data.map[y][x].startsWith('move-bomb'))
     },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
@@ -357,17 +366,21 @@ export default {
       setInterval(function () {
         if ($vm.countDown <= 0) return
         for (let e of $vm.enemies) {
-          if (e.type === 'stop') continue
-          if (!$vm.moveEnemy(e)) {
-            $vm.moveEnemy(e)
+          if (!$vm.moveObject('enemy-', e)) {
+            $vm.moveObject('enemy-', e)
+          }
+        }
+        for (let b of $vm.moveBombs) {
+          if (!$vm.moveObject('move-bomb-', b)) {
+            $vm.moveObject('move-bomb-', b)
           }
         }
       }, 1000)
     },
-    moveEnemy (enemy) {
-      let x = enemy.x
-      let y = enemy.y
-      const mode = (enemy.mode === 'default') ? enemy.default : enemy.reverse
+    moveObject (prefix, object) {
+      let x = object.x
+      let y = object.y
+      const mode = (object.mode === 'default') ? object.default : object.reverse
       switch (mode) {
         case 'e':
           x++
@@ -397,13 +410,13 @@ export default {
       this.isRedBomb(x, y) ||
       this.data.map[y][x] !== 'none'
       ) {
-        enemy.mode = (enemy.mode === 'default') ? 'reverse' : 'default'
+        object.mode = (object.mode === 'default') ? 'reverse' : 'default'
         return false
       }
-      this.data.map[enemy.y][enemy.x] = 'none'
-      this.data.map[y][x] = 'enemy-' + enemy.type
-      enemy.x = x
-      enemy.y = y
+      this.data.map[object.y][object.x] = 'none'
+      this.data.map[y][x] = prefix + object.type
+      object.x = x
+      object.y = y
       return true
     },
     timerStart () {
@@ -554,6 +567,11 @@ export default {
             for (let [key, e] of Object.entries(ENEMIES)) {
               if ($vm.data.map[y][x] === 'enemy-' + key) {
                 $vm.enemies.push({x: x, y: y, type: key, mode: 'default', default: e['default'], reverse: e['reverse']})
+              }
+            }
+            for (let [key, e] of Object.entries(MOVE_BOMBS)) {
+              if ($vm.data.map[y][x] === 'move-bomb-' + key) {
+                $vm.moveBombs.push({x: x, y: y, type: key, mode: 'default', default: e['default'], reverse: e['reverse']})
               }
             }
           }
