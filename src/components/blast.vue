@@ -268,7 +268,7 @@ export default {
             if (a[1] === REVERSE[d.axis]) {
               setTimeout(function () {
                 $vm.fire(mx, my, a[2])
-              }, 250)
+              }, 300)
             }
             break
           }
