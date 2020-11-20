@@ -140,17 +140,27 @@ const ROTATE = {
   'nw': {rotate: '135deg'}
 }
 const ENEMIES = {
-  'vertical': {'default': 's', 'reverse': 'n'},
-  'n': {'default': 'n', 'reverse': 's'},
-  's': {'default': 's', 'reverse': 'n'},
-  'e': {'default': 'e', 'reverse': 'w'},
-  'w': {'default': 'w', 'reverse': 'e'}
+  'vertical': {'default': 's'},
+  'n': {'default': 'n'},
+  's': {'default': 's'},
+  'e': {'default': 'e'},
+  'w': {'default': 'w'}
 }
 const MOVE_BOMBS = {
-  'n': {'default': 'n', 'reverse': 's'},
-  's': {'default': 's', 'reverse': 'n'},
-  'e': {'default': 'e', 'reverse': 'w'},
-  'w': {'default': 'w', 'reverse': 'e'}
+  'n': {'default': 'n'},
+  's': {'default': 's'},
+  'e': {'default': 'e'},
+  'w': {'default': 'w'}
+}
+const REVERSE = {
+  'n': 's',
+  's': 'w',
+  'e': 'w',
+  'w': 'e',
+  'ne': 'sw',
+  'sw': 'ne',
+  'nw': 'se',
+  'se': 'ne'
 }
 
 export default {
@@ -226,11 +236,15 @@ export default {
         }
       }
     },
-    async fire (x, y) {
+    async fire (x, y, axis = '') {
       this.setExplosion(x, y, true)
       this.data.map[y][x] = 'none'
       let nextBombs = []
+      let $vm = this
       for (let d of DIRECTIONS) {
+        if (axis !== '' && d.axis !== axis) {
+          continue
+        }
         let sx = parseInt(x)
         let sy = parseInt(y)
         let mx = sx
@@ -243,7 +257,21 @@ export default {
           let mkey = this.getKey(mx, my)
           if (my < 1 || my > Object.keys(this.data.map).length) break
           if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
-          if (this.isUnbreakable(mx, my)) break
+          if (this.isUnbreakable(mx, my)) {
+            break
+          }
+          if (this.isArrow(mx, my)) {
+            this.logging('arrow!')
+            let a = this.data.map[my][mx].split('-')
+            this.logging(a)
+            this.logging(d.axis)
+            if (a[1] === REVERSE[d.axis]) {
+              setTimeout(function () {
+                $vm.fire(mx, my, a[2])
+              }, 250)
+            }
+            break
+          }
           if (this.isBreakable1(mx, my)) {
             this.setExplosion(mx, my, false)
             this.data.installations[this.data.map[my][mx]]--
@@ -330,6 +358,9 @@ export default {
     },
     isEnemyDown (x, y) {
       return (this.data.map[y][x] === 'enemy-down')
+    },
+    isArrow (x, y) {
+      return (this.data.map[y][x].startsWith('arrow-'))
     },
     setExplosion (x, y, bomb) {
       const key = this.getKey(x, y)
@@ -566,12 +597,12 @@ export default {
           for (let x in $vm.data.map[y]) {
             for (let [key, e] of Object.entries(ENEMIES)) {
               if ($vm.data.map[y][x] === 'enemy-' + key) {
-                $vm.enemies.push({x: x, y: y, type: key, mode: 'default', default: e['default'], reverse: e['reverse']})
+                $vm.enemies.push({x: x, y: y, type: key, mode: 'default', default: e.default, reverse: REVERSE[e.default]})
               }
             }
             for (let [key, e] of Object.entries(MOVE_BOMBS)) {
               if ($vm.data.map[y][x] === 'move-bomb-' + key) {
-                $vm.moveBombs.push({x: x, y: y, type: key, mode: 'default', default: e['default'], reverse: e['reverse']})
+                $vm.moveBombs.push({x: x, y: y, type: key, mode: 'default', default: e.default, reverse: REVERSE[e.default]})
               }
             }
           }

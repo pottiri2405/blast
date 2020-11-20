@@ -157,6 +157,14 @@
   z-index: 100;
   animation: explosion-bomb-animation 0.5s forwards;
 }
+.arrow-w-n {
+  background-image: url("/static/bomb/arrow-w-n.svg");
+  background-size: cover;
+}
+.arrow-w-s {
+  background-image: url("/static/bomb/arrow-w-s.svg");
+  background-size: cover;
+}
 @keyframes explosion-bomb-animation {
   0% {transform: scale(0, 0);}
   90% {transform: scale(2.0, 2.0);}
