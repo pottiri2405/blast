@@ -2,8 +2,8 @@
   <div id="stage">
     <img src="/static/bomb/fire.svg" style="display: none;">
     <img src="/static/bomb/explosion-bomb.svg" style="display: none;">
-    <b-spinner v-show="init===true" id="init-loading" label="Large Spinner"></b-spinner>
-    <b-container v-show="init===false">
+    <b-spinner v-show="status==='loading'" id="init-loading" label="Large Spinner"></b-spinner>
+    <b-container v-show="status!=='loading'">
       <b-row class="mt-2">
         <b-col>
           <!-- <b-button pill size="sm" variant="info" v-touch="clear">
@@ -33,7 +33,8 @@
               v-touch:start="setRedBomb(x, y)"
               class="box-base"
               :class="boxClasses(x, y)">
-                <p v-show="isRedBomb(x, y) && countDown > 0 && countDown < 999" id="count-down">{{ countDown }}</p>
+                <p v-show="isRedBomb(x, y) && countDown > 0 && countDown < 999" class="count-down">{{ countDown }}</p>
+                <p v-show="isTimerBomb(x, y) && timerBombs[getKey(x, y)]" class="ignition"><b-icon-exclamation rotate="45" variant="danger"></b-icon-exclamation></p>
                 <img v-if="isExplosionBomb(x, y)" src="/static/bomb/explosion-bomb.svg" class="explosion-bomb">
                 <img v-for="(f, i) in blastArray(x, y)" v-bind:key="'blast-1-' + i" src="/static/bomb/fire.svg" class="blast" :style="blastStyle(f)">
                 <p :ref="'box-' + x + '-' + y"></p>
@@ -166,12 +167,13 @@ const REVERSE = {
 export default {
   data () {
     return {
-      init: true,
+      status: 'loading',
       language: null,
       timer: {time: '00:00:00.000', began: null, stopped: null, duration: 0, started: null, running: false},
       data: {map: {}},
       life: {stock: 0, max: 100},
-      bomb: {},
+      redBombs: {},
+      timerBombs: {},
       explosion: {},
       buruburu: {},
       countDown: 999,
@@ -184,129 +186,8 @@ export default {
   },
   methods: {
     clear () {
-      this.bomb.length = 0
+      this.redBombs.length = 0
       this.life.stock = this.life.max
-    },
-    setRedBomb (x, y) {
-      let $vm = this
-      if ($vm.life.stock <= 0) {
-        return
-      }
-      return async function (event) {
-        // 空白以外なら爆弾設置不可
-        if ($vm.data.map[y][x] !== 'none') return
-
-        let key = $vm.getKey(x, y)
-        if ($vm.bomb[key]) {
-          delete $vm.bomb[key]
-          $vm.life.stock++
-          return
-        }
-        $vm.life.stock--
-        await $vm.sleep(500)
-        $vm.bomb[key] = {x: x, y: y}
-        await $vm.sleep(500)
-        if ($vm.life.stock <= 0) {
-          $vm.timerStop()
-          $vm.countDown = 3
-          await $vm.sleep(1000)
-          $vm.countDown--
-          await $vm.sleep(1000)
-          $vm.countDown--
-          await $vm.sleep(1000)
-          $vm.countDown--
-          for (let k of Object.keys($vm.bomb)) {
-            await $vm.fire($vm.bomb[k].x, $vm.bomb[k].y)
-            delete $vm.bomb[key]
-          }
-          await $vm.sleep(3000)
-          let complete = true
-          for (let [key, value] of Object.entries($vm.data.installations)) {
-            if (key === 'unbreakable') continue
-            if (parseInt(value) > 0) {
-              complete = false
-              break
-            }
-          }
-          if (complete) {
-            $vm.$refs['modal-complete'].show()
-          } else {
-            $vm.$refs['modal-failure'].show()
-          }
-        }
-      }
-    },
-    async fire (x, y, axis = '') {
-      this.setExplosion(x, y, true)
-      this.data.map[y][x] = 'none'
-      let nextBombs = []
-      let $vm = this
-      for (let d of DIRECTIONS) {
-        if (axis !== '' && d.axis !== axis) {
-          continue
-        }
-        let sx = parseInt(x)
-        let sy = parseInt(y)
-        let mx = sx
-        let my = sy
-        let tx = sx
-        let ty = sy
-        while (1) {
-          mx += d.fx
-          my += d.fy
-          let mkey = this.getKey(mx, my)
-          if (my < 1 || my > Object.keys(this.data.map).length) break
-          if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
-          if (this.isUnbreakable(mx, my)) {
-            break
-          }
-          if (this.isArrow(mx, my)) {
-            this.logging('arrow!')
-            let a = this.data.map[my][mx].split('-')
-            this.logging(a)
-            this.logging(d.axis)
-            if (a[1] === REVERSE[d.axis]) {
-              setTimeout(function () {
-                $vm.fire(mx, my, a[2])
-              }, 300)
-            }
-            break
-          }
-          if (this.isBreakable1(mx, my)) {
-            this.setExplosion(mx, my, false)
-            this.data.installations[this.data.map[my][mx]]--
-            this.data.map[my][mx] = 'none'
-            tx = mx
-            ty = my
-            break
-          }
-          if (this.isEnemy(mx, my)) {
-            this.setExplosion(mx, my, false)
-            this.data.installations[this.data.map[my][mx]]--
-            this.data.map[my][mx] = 'enemy-down'
-            tx = mx
-            ty = my
-          }
-          if (this.isBlackBomb(mx, my) || this.isMoveBomb(mx, my)) {
-            if (!nextBombs.includes(mkey)) nextBombs.push(mkey)
-            tx = mx
-            ty = my
-            this.data.installations[this.data.map[my][mx]]--
-            continue
-          }
-          this.setExplosion(tx, ty, false)
-          tx = mx
-          ty = my
-        }
-        if (sx !== tx || sy !== ty) {
-          this.blasting(d.axis, sx, sy, tx, ty)
-        }
-      }
-      this.buruburu = {}
-      for (let k of nextBombs) {
-        let xy = k.split('-')
-        await this.fire(xy[0], xy[1])
-      }
     },
     boxClasses (x, y) {
       let array = []
@@ -338,14 +219,291 @@ export default {
       }
       return array.join(' ')
     },
+    gameStart () {
+      this.$refs['modal-start'].hide()
+      this.status = 'running'
+      this.timerStart()
+      let $vm = this
+      setInterval(async function () {
+        if ($vm.status === 'init' || $vm.status === 'end') return
+
+        if ($vm.status === 'running') {
+          $vm.moveObjectAll()
+        }
+        if ($vm.status === 'ready') {
+          if ($vm.countDown > 0) {
+            $vm.countDown--
+          }
+          if ($vm.countDown === 0) {
+            $vm.status = 'exploding'
+          }
+        }
+        if ($vm.status === 'exploding') {
+          for (let k of Object.keys($vm.timerBombs)) {
+            await $vm.fire($vm.timerBombs[k].x, $vm.timerBombs[k].y)
+            delete $vm.timerBombs[k]
+          }
+          for (let k of Object.keys($vm.redBombs)) {
+            await $vm.fire($vm.redBombs[k].x, $vm.redBombs[k].y)
+            delete $vm.redBombs[k]
+          }
+          $vm.moveObjectAll()
+          if (Object.keys($vm.timerBombs).length <= 0) {
+            $vm.status = 'result'
+          }
+        }
+        if ($vm.status === 'result') {
+          await $vm.sleep(2000)
+          let complete = true
+          for (let [key, value] of Object.entries($vm.data.installations)) {
+            if (key === 'unbreakable') continue
+            if (key.startsWith('arrow-')) continue
+            if (key === 'enemy-down') continue
+            if (parseInt(value) > 0) {
+              complete = false
+              break
+            }
+          }
+          if (complete) {
+            $vm.$refs['modal-complete'].show()
+          } else {
+            $vm.$refs['modal-failure'].show()
+          }
+          $vm.status = 'end'
+        }
+      }, 1000)
+    },
+    setRedBomb (x, y) {
+      let $vm = this
+      if ($vm.life.stock <= 0) {
+        return
+      }
+      return async function (event) {
+        // 空白以外なら爆弾設置不可
+        if ($vm.data.map[y][x] !== 'none') return
+
+        let key = $vm.getKey(x, y)
+        if ($vm.redBombs[key]) {
+          delete $vm.redBombs[key]
+          $vm.life.stock++
+          return
+        }
+        $vm.life.stock--
+        await $vm.sleep(500)
+        $vm.redBombs[key] = {x: x, y: y}
+        await $vm.sleep(500)
+        if ($vm.life.stock <= 0) {
+          $vm.timerStop()
+          $vm.status = 'ready'
+          $vm.countDown = 3
+        }
+      }
+    },
+    async fire (x, y, axis = '') {
+      this.setExplosion(x, y, true)
+      this.data.map[y][x] = 'none'
+      let nextBombs = []
+      let $vm = this
+      for (let d of DIRECTIONS) {
+        if (axis !== '' && d.axis !== axis) {
+          continue
+        }
+        let sx = parseInt(x)
+        let sy = parseInt(y)
+        let mx = sx
+        let my = sy
+        let tx = sx
+        let ty = sy
+        while (1) {
+          mx += d.fx
+          my += d.fy
+          let mkey = this.getKey(mx, my)
+          if (my < 1 || my > Object.keys(this.data.map).length) break
+          if (mx < 1 || mx > Object.keys(this.data.map[my]).length) break
+          if (this.isUnbreakable(mx, my)) {
+            break
+          }
+          if (this.isArrow(mx, my)) {
+            let a = this.data.map[my][mx].split('-')
+            if (a[1] === REVERSE[d.axis]) {
+              setTimeout(function () {
+                $vm.fire(mx, my, a[2])
+              }, 300)
+            }
+            break
+          }
+          if (this.isBreakable1(mx, my)) {
+            this.setExplosion(mx, my, false)
+            this.data.installations[this.data.map[my][mx]]--
+            this.data.map[my][mx] = 'none'
+            tx = mx
+            ty = my
+            break
+          }
+          if (this.isEnemy(mx, my)) {
+            this.setExplosion(mx, my, false)
+            this.data.installations[this.data.map[my][mx]]--
+            this.data.map[my][mx] = 'enemy-down'
+            tx = mx
+            ty = my
+          }
+          if (this.isBlackBomb(mx, my) || this.isMoveBomb(mx, my)) {
+            if (!nextBombs.includes(mkey)) {
+              nextBombs.push(mkey)
+              this.data.installations[this.data.map[my][mx]]--
+            }
+            tx = mx
+            ty = my
+            continue
+          }
+          if (this.isTimerBomb(mx, my)) {
+            if (!this.timerBombs[mkey]) {
+              this.timerBombs[mkey] = {x: mx, y: my}
+              this.data.installations[this.data.map[my][mx]]--
+            }
+            tx = mx
+            ty = my
+            continue
+          }
+          this.setExplosion(tx, ty, false)
+          tx = mx
+          ty = my
+        }
+        if (sx !== tx || sy !== ty) {
+          this.blasting(d.axis, sx, sy, tx, ty)
+        }
+      }
+      this.buruburu = {}
+      for (let k of nextBombs) {
+        let xy = k.split('-')
+        await this.fire(xy[0], xy[1])
+      }
+    },
+    moveObjectAll () {
+      let $vm = this
+      for (let e of $vm.enemies) {
+        if (!$vm.moveObject('enemy-', e)) {
+          $vm.moveObject('enemy-', e)
+        }
+      }
+      for (let b of $vm.moveBombs) {
+        if (!$vm.moveObject('move-bomb-', b)) {
+          $vm.moveObject('move-bomb-', b)
+        }
+      }
+    },
+    moveObject (prefix, object) {
+      let x = object.x
+      let y = object.y
+      const mode = (object.mode === 'default') ? object.default : object.reverse
+      switch (mode) {
+        case 'e':
+          x++
+          break
+        case 'ne':
+          break
+        case 'n':
+          y--
+          break
+        case 'nw':
+          break
+        case 'w':
+          x--
+          break
+        case 'sw':
+          break
+        case 's':
+          y++
+          break
+        case 'se':
+          break
+        default:
+          break
+      }
+      if ((y < 1 || y > Object.keys(this.data.map).length) ||
+      (x < 1 || x > Object.keys(this.data.map[y]).length) ||
+      this.isRedBomb(x, y) ||
+      this.data.map[y][x] !== 'none'
+      ) {
+        object.mode = (object.mode === 'default') ? 'reverse' : 'default'
+        return false
+      }
+      this.data.map[object.y][object.x] = 'none'
+      this.data.map[y][x] = prefix + object.type
+      object.x = x
+      object.y = y
+      return true
+    },
+    blasting (axis, sx, sy, tx, ty) {
+      let start = this.$refs['box-' + this.getKey(sx, sy)][0].getBoundingClientRect()
+      let end = this.$refs['box-' + this.getKey(tx, ty)][0].getBoundingClientRect()
+      const skey = this.getKey(sx, sy)
+      if (!this.blasts[skey]) {
+        this.blasts[skey] = []
+      }
+      const diffX = end.left - start.left
+      const diffY = end.top - start.top
+      let $vm = this
+      $vm.blasts[skey].push({
+        '--animation-second': '0.5s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.6s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.7s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.8s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '0.9s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+      $vm.blasts[skey].push({
+        '--animation-second': '1.0s',
+        '--translate-x': diffX + 'px',
+        '--translate-y': diffY + 'px',
+        '--rotate': ROTATE[axis].rotate
+      })
+    },
+    blastArray (x, y) {
+      const key = this.getKey(x, y)
+      if (!this.blasts[key]) return []
+      return this.blasts[key]
+    },
+    blastStyle (attributes) {
+      let style = ''
+      for (let [key, value] of Object.entries(attributes)) {
+        style += key + ':' + value + ';'
+      }
+      return style
+    },
     isRedBomb (x, y) {
-      return Object.keys(this.bomb).includes(this.getKey(x, y))
+      return Object.keys(this.redBombs).includes(this.getKey(x, y))
     },
     isBlackBomb (x, y) {
       return (this.data.map[y][x] === 'black-bomb')
     },
     isMoveBomb (x, y) {
       return (this.data.map[y][x].startsWith('move-bomb'))
+    },
+    isTimerBomb (x, y) {
+      return (this.data.map[y][x] === 'timer-bomb')
     },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
@@ -389,66 +547,6 @@ export default {
     explosionCount (x, y) {
       if (!Object.keys(this.explosion).includes(this.getKey(x, y)) || this.explosion[this.getKey(x, y)].count === 1) return '&nbsp;'
       return this.explosion[this.getKey(x, y)].count
-    },
-    gameStart () {
-      this.$refs['modal-start'].hide()
-      this.timerStart()
-      let $vm = this
-      setInterval(function () {
-        if ($vm.countDown <= 0) return
-        for (let e of $vm.enemies) {
-          if (!$vm.moveObject('enemy-', e)) {
-            $vm.moveObject('enemy-', e)
-          }
-        }
-        for (let b of $vm.moveBombs) {
-          if (!$vm.moveObject('move-bomb-', b)) {
-            $vm.moveObject('move-bomb-', b)
-          }
-        }
-      }, 1000)
-    },
-    moveObject (prefix, object) {
-      let x = object.x
-      let y = object.y
-      const mode = (object.mode === 'default') ? object.default : object.reverse
-      switch (mode) {
-        case 'e':
-          x++
-          break
-        case 'ne':
-          break
-        case 'n':
-          y--
-          break
-        case 'nw':
-          break
-        case 'w':
-          x--
-          break
-        case 'sw':
-          break
-        case 's':
-          y++
-          break
-        case 'se':
-          break
-        default:
-          break
-      }
-      if ((y < 1 || y > Object.keys(this.data.map).length) ||
-      (x < 1 || x > Object.keys(this.data.map[y]).length) ||
-      this.isRedBomb(x, y) ||
-      this.data.map[y][x] !== 'none'
-      ) {
-        object.mode = (object.mode === 'default') ? 'reverse' : 'default'
-        return false
-      }
-      this.data.map[object.y][object.x] = 'none'
-      this.data.map[y][x] = prefix + object.type
-      object.x = x
-      object.y = y
-      return true
     },
     timerStart () {
       if (this.timer.running !== false) return
@@ -520,65 +618,6 @@ export default {
           window.parent.location.href = process.env.MAIN_URL_JA + '/posts/level' + level + '-1'
         }
       }
-    },
-    blasting (axis, sx, sy, tx, ty) {
-      let start = this.$refs['box-' + this.getKey(sx, sy)][0].getBoundingClientRect()
-      let end = this.$refs['box-' + this.getKey(tx, ty)][0].getBoundingClientRect()
-      const skey = this.getKey(sx, sy)
-      if (!this.blasts[skey]) {
-        this.blasts[skey] = []
-      }
-      const diffX = end.left - start.left
-      const diffY = end.top - start.top
-      let $vm = this
-      $vm.blasts[skey].push({
-        '--animation-second': '0.5s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.6s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.7s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.8s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.9s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '1.0s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-    },
-    blastArray (x, y) {
-      const key = this.getKey(x, y)
-      if (!this.blasts[key]) return []
-      return this.blasts[key]
-    },
-    blastStyle (attributes) {
-      let style = ''
-      for (let [key, value] of Object.entries(attributes)) {
-        style += key + ':' + value + ';'
-      }
-      return style
     }
   },
   mounted () {
@@ -607,7 +646,7 @@ export default {
             }
           }
         }
-        $vm.init = false
+        $vm.status = 'running'
         $vm.$refs['modal-start'].show()
       })
       .catch(err => {

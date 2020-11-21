@@ -6,12 +6,17 @@
   top: 50px;
   left:calc(50% - 50px/2);
 }
-#count-down {
+.count-down {
   font-size: 4rem;
   z-index: 999;
   position: absolute;
   left: -0.5rem;
   top: -4rem;
+}
+.ignition {
+  font-size: 2rem;
+  z-index: 999;
+  position: absolute;
 }
 @media screen and (max-width: 768px) {
   #map {
@@ -109,6 +114,10 @@
   background-size: cover;
   animation: scale-animation 1.0s infinite;
 }
+.timer-bomb {
+  background-image: url("/static/bomb/timter-bomb.svg");
+  background-size: cover;
+}
 .unbreakable {
   background-image: url("/static/bomb/unbreakable.svg");
   background-size: cover;
@@ -134,6 +143,9 @@
 .enemy-w {
   background-image: url("/static/bomb/enemy-blue.svg");
   background-size: cover;
+  animation: scale-animation 1.0s infinite;
+}
+.scale {
   animation: scale-animation 1.0s infinite;
 }
 @keyframes scale-animation {
