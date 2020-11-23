@@ -2,13 +2,11 @@
   <div id="stage">
     <img src="/static/bomb/fire.svg" style="display: none;">
     <img src="/static/bomb/explosion-bomb.svg" style="display: none;">
+    <img v-show="status==='full-blast'" src="/static/bomb/explosion-bomb.svg" class="big-explosion">
     <b-spinner v-show="status==='loading'" id="init-loading" label="Large Spinner"></b-spinner>
     <b-container v-show="status!=='loading'">
       <b-row class="mt-2">
         <b-col>
-          <!-- <b-button pill size="sm" variant="info" v-touch="clear">
-            {{ $t("message.checked_clear") }}
-          </b-button> -->
           <b-button pill size="sm" variant="warning" v-touch="restart">
             {{ $t("message.restart") }}
           </b-button>
@@ -32,12 +30,12 @@
               :key="'box' + x + '-' + y"
               v-touch:start="setRedBomb(x, y)"
               class="box-base"
-              :class="boxClasses(x, y)">
+              :class="boxClasses(x, y)"
+              :style="'--box-width: ' + getBoxWidth() + ';--box-height:' + getBoxHeight() + ';'">
+                <p :ref="'box-' + x + '-' + y" class="dummy"></p>
                 <p v-show="isRedBomb(x, y) && countDown > 0 && countDown < 999" class="count-down">{{ countDown }}</p>
-                <p v-show="isTimerBomb(x, y) && timerBombs[getKey(x, y)]" class="ignition"><b-icon-exclamation rotate="45" variant="danger"></b-icon-exclamation></p>
-                <img v-if="isExplosionBomb(x, y)" src="/static/bomb/explosion-bomb.svg" class="explosion-bomb">
-                <img v-for="(f, i) in blastArray(x, y)" v-bind:key="'blast-1-' + i" src="/static/bomb/fire.svg" class="blast" :style="blastStyle(f)">
-                <p :ref="'box-' + x + '-' + y"></p>
+                <img v-for="(info, idx) in boxImages(x, y)" v-bind:key="'box-image-1-' + idx" :src="info.src" :class="info.class" :style="info.style">
+                <img v-for="(attr, idx) in blastImages(x, y)" v-bind:key="'box-blast-1-' + idx" src="/static/bomb/fire.svg" class="blast" :style="hashToStyle(attr)">
               </td>
             </tr>
           </table>
@@ -155,7 +153,7 @@ const MOVE_BOMBS = {
 }
 const REVERSE = {
   'n': 's',
-  's': 'w',
+  's': 'n',
   'e': 'w',
   'w': 'e',
   'ne': 'sw',
@@ -163,6 +161,8 @@ const REVERSE = {
   'nw': 'se',
   'se': 'ne'
 }
+let BOX_WIDTH = '1.75rem'
+let BOX_HEIGHT = '1.75rem'
 
 export default {
   data () {
@@ -175,16 +175,23 @@ export default {
       redBombs: {},
       timerBombs: {},
       explosion: {},
-      buruburu: {},
       countDown: 999,
       previousUrl: null,
       nextUrl: null,
       blasts: {},
       enemies: [],
-      moveBombs: []
+      moveBombs: [],
+      activeArrows: [],
+      deactiveArrows: []
     }
   },
   methods: {
+    getBoxWidth () {
+      return BOX_WIDTH
+    },
+    getBoxHeight () {
+      return BOX_HEIGHT
+    },
     clear () {
       this.redBombs.length = 0
       this.life.stock = this.life.max
@@ -207,16 +214,6 @@ export default {
           if ((idx % 2) === 0) array.push('box-pattern2')
         }
       }
-      if (this.isRedBomb(x, y)) {
-        if (this.countDown === 999) array.push('red-bomb-down')
-        if (this.countDown > 0 && this.countDown < 999) array.push('red-bomb-scale')
-      } else if (this.isBlackBomb(x, y)) {
-        array.push('black-bomb')
-      } else if (this.isBreakable1(x, y)) {
-        array.push('breakable1')
-      } else {
-        array.push(this.data.map[y][x])
-      }
       return array.join(' ')
     },
     gameStart () {
@@ -224,21 +221,38 @@ export default {
       this.status = 'running'
       this.timerStart()
       let $vm = this
+      let turn = 1
+      let before = 0
       setInterval(async function () {
-        if ($vm.status === 'init' || $vm.status === 'end') return
-
+        if ($vm.status === 'init' || $vm.status === 'end' || $vm.status === 'all-clear') return
+        if (turn === before) return
         if ($vm.status === 'running') {
           $vm.moveObjectAll()
+          before = turn
+          turn++
+          return
         }
+        let just = false
         if ($vm.status === 'ready') {
           if ($vm.countDown > 0) {
+            $vm.moveObjectAll()
             $vm.countDown--
           }
           if ($vm.countDown === 0) {
+            just = true
             $vm.status = 'exploding'
+          } else {
+            before = turn
+            turn++
+            return
           }
         }
         if ($vm.status === 'exploding') {
+          for (let k of Object.keys($vm.activeArrows)) {
+            await $vm.fire($vm.activeArrows[k].x, $vm.activeArrows[k].y, $vm.activeArrows[k].axis)
+            delete $vm.activeArrows[k]
+            $vm.deactiveArrows[k] = k
+          }
           for (let k of Object.keys($vm.timerBombs)) {
             await $vm.fire($vm.timerBombs[k].x, $vm.timerBombs[k].y)
             delete $vm.timerBombs[k]
@@ -247,12 +261,26 @@ export default {
             await $vm.fire($vm.redBombs[k].x, $vm.redBombs[k].y)
             delete $vm.redBombs[k]
           }
-          $vm.moveObjectAll()
-          if (Object.keys($vm.timerBombs).length <= 0) {
+          if (Object.keys($vm.timerBombs).length <= 0 && Object.keys($vm.activeArrows).length <= 0 && $vm.status !== 'super-bomb') {
             $vm.status = 'result'
+          } else if (just === false) {
+            $vm.moveObjectAll()
           }
+          before = turn
+          turn++
+          return
         }
-        if ($vm.status === 'result') {
+        if ($vm.status === 'super-bomb') {
+          $vm.status = 'full-blast'
+          before = turn
+          turn++
+          return
+        }
+        if ($vm.status === 'full-blast') {
+          $vm.status = 'all-clear'
+          await $vm.sleep(1000)
+        }
+        if ($vm.status === 'result' || $vm.status === 'all-clear') {
           await $vm.sleep(2000)
           let complete = true
           for (let [key, value] of Object.entries($vm.data.installations)) {
@@ -264,12 +292,13 @@ export default {
               break
             }
           }
-          if (complete) {
+          if (complete || $vm.status === 'all-clear') {
             $vm.$refs['modal-complete'].show()
+            if (complete) $vm.status = 'end'
           } else {
             $vm.$refs['modal-failure'].show()
+            $vm.status = 'end'
           }
-          $vm.status = 'end'
         }
       }, 1000)
     },
@@ -300,10 +329,10 @@ export default {
       }
     },
     async fire (x, y, axis = '') {
+      this.logging('fire! (' + x + ', ' + y + ')')
       this.setExplosion(x, y, true)
       this.data.map[y][x] = 'none'
       let nextBombs = []
-      let $vm = this
       for (let d of DIRECTIONS) {
         if (axis !== '' && d.axis !== axis) {
           continue
@@ -323,12 +352,15 @@ export default {
           if (this.isUnbreakable(mx, my)) {
             break
           }
-          if (this.isArrow(mx, my)) {
+          if (this.isSuperBomb(mx, my)) {
+            this.setExplosion(mx, my, false)
+            this.status = 'super-bomb'
+            break
+          }
+          if (this.isArrow(mx, my) && !this.activeArrows[mkey] && !this.deactiveArrows[mkey]) {
             let a = this.data.map[my][mx].split('-')
             if (a[1] === REVERSE[d.axis]) {
-              setTimeout(function () {
-                $vm.fire(mx, my, a[2])
-              }, 300)
+              this.activeArrows[mkey] = {x: mx, y: my, axis: a[2]}
             }
             break
           }
@@ -341,6 +373,7 @@ export default {
             break
           }
           if (this.isEnemy(mx, my)) {
+            this.logging('enemy! (' + mx + ', ' + my + ')')
             this.setExplosion(mx, my, false)
             this.data.installations[this.data.map[my][mx]]--
             this.data.map[my][mx] = 'enemy-down'
@@ -373,24 +406,25 @@ export default {
           this.blasting(d.axis, sx, sy, tx, ty)
         }
       }
-      this.buruburu = {}
       for (let k of nextBombs) {
         let xy = k.split('-')
         await this.fire(xy[0], xy[1])
       }
+      this.$forceUpdate()
     },
     moveObjectAll () {
       let $vm = this
       for (let e of $vm.enemies) {
-        if (!$vm.moveObject('enemy-', e)) {
+        if ($vm.moveObject('enemy-', e) === false) {
           $vm.moveObject('enemy-', e)
         }
       }
       for (let b of $vm.moveBombs) {
-        if (!$vm.moveObject('move-bomb-', b)) {
+        if ($vm.moveObject('move-bomb-', b) === false) {
           $vm.moveObject('move-bomb-', b)
         }
       }
+      $vm.$forceUpdate()
     },
     moveObject (prefix, object) {
       let x = object.x
@@ -401,21 +435,29 @@ export default {
           x++
           break
         case 'ne':
+          x++
+          y--
           break
         case 'n':
           y--
           break
         case 'nw':
+          x--
+          y--
           break
         case 'w':
           x--
           break
         case 'sw':
+          x--
+          y++
           break
         case 's':
           y++
           break
         case 'se':
+          x++
+          y++
           break
         default:
           break
@@ -430,6 +472,7 @@ export default {
       }
       this.data.map[object.y][object.x] = 'none'
       this.data.map[y][x] = prefix + object.type
+      this.logging('(' + object.x + ', ' + object.y + ') > ' + '(' + x + ', ' + y + ')')
       object.x = x
       object.y = y
       return true
@@ -443,55 +486,68 @@ export default {
       }
       const diffX = end.left - start.left
       const diffY = end.top - start.top
-      let $vm = this
-      $vm.blasts[skey].push({
-        '--animation-second': '0.5s',
+      let style = {
+        width: this.getBoxWidth() + ' !important',
+        height: this.getBoxHeight() + ' !important',
+        position: 'absolute',
+        'z-index': 100,
+        'ation-timing-function': 'linear',
         '--translate-x': diffX + 'px',
         '--translate-y': diffY + 'px',
         '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.6s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.7s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.8s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '0.9s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
-      $vm.blasts[skey].push({
-        '--animation-second': '1.0s',
-        '--translate-x': diffX + 'px',
-        '--translate-y': diffY + 'px',
-        '--rotate': ROTATE[axis].rotate
-      })
+      }
+      this.blasts[skey].push(Object.assign({'--animation-second': '0.5s'}, style))
+      this.blasts[skey].push(Object.assign({'--animation-second': '0.6s'}, style))
+      this.blasts[skey].push(Object.assign({'--animation-second': '0.7s'}, style))
+      this.blasts[skey].push(Object.assign({'--animation-second': '0.8s'}, style))
+      this.blasts[skey].push(Object.assign({'--animation-second': '0.9s'}, style))
+      this.blasts[skey].push(Object.assign({'--animation-second': '1.0s'}, style))
     },
-    blastArray (x, y) {
+    boxImages (x, y) {
+      if (this.status === 'all-clear') return []
+      const key = this.getKey(x, y)
+      const base = '/static/bomb/'
+      const style = 'width: ' + this.getBoxWidth() + ';height:' + this.getBoxHeight() + ';'
+      let images = []
+      if (this.isExplosionBomb(x, y)) {
+        images.push({src: base + 'explosion-bomb.svg', class: 'explosion-bomb', style: style})
+      } else if (this.isRedBomb(x, y)) {
+        let image = {src: base + 'red-bomb.svg', class: '', style: style}
+        if (this.countDown === 999) image.class = 'drop-down'
+        if (this.countDown > 0 && this.countDown < 999) image.class = 'flash'
+        images.push(image)
+      } else if (this.isBlackBomb(x, y)) {
+        images.push({src: base + 'black-bomb.svg', class: 'scale', style: style})
+      } else if (this.isTimerBomb(x, y)) {
+        images.push({src: base + 'timer-bomb.svg', class: this.timerBombs[key] ? 'flash-quick' : '', style: style})
+      } else if (this.data.map[y][x].startsWith('move-bomb')) {
+        images.push({src: base + 'blue-bomb.svg', class: 'scale', style: style})
+      } else if (this.isSuperBomb(x, y)) {
+        if (this.status !== 'full-blast') {
+          images.push({src: base + 'super-bomb.svg', class: this.status === 'super-bomb' ? 'flash-quick' : '', style: style})
+        }
+      } else if (this.isEnemyDown(x, y)) {
+        images.push({src: base + 'enemy-down.svg', class: 'knockout', style: style})
+      } else if (this.isEnemyStop(x, y)) {
+        images.push({src: base + 'enemy-purple.svg', class: 'scale', style: style})
+      } else if (this.isEnemy(x, y)) {
+        images.push({src: base + 'enemy-blue.svg', class: 'scale', style: style})
+      } else if (this.data.map[y][x] !== 'none') {
+        // unbreakable
+        // breakable1
+        // arrow
+        let image = {src: base + this.data.map[y][x] + '.svg', class: '', style: style}
+        if (this.isArrow(x, y) && this.activeArrows[key]) {
+          image.class = 'erase'
+        }
+        images.push(image)
+      }
+      return images
+    },
+    blastImages (x, y) {
       const key = this.getKey(x, y)
       if (!this.blasts[key]) return []
       return this.blasts[key]
-    },
-    blastStyle (attributes) {
-      let style = ''
-      for (let [key, value] of Object.entries(attributes)) {
-        style += key + ':' + value + ';'
-      }
-      return style
     },
     isRedBomb (x, y) {
       return Object.keys(this.redBombs).includes(this.getKey(x, y))
@@ -505,6 +561,9 @@ export default {
     isTimerBomb (x, y) {
       return (this.data.map[y][x] === 'timer-bomb')
     },
+    isSuperBomb (x, y) {
+      return (this.data.map[y][x] === 'super-bomb')
+    },
     isUnbreakable (x, y) {
       return (this.data.map[y][x] === 'unbreakable')
     },
@@ -513,6 +572,9 @@ export default {
     },
     isEnemy (x, y) {
       return (this.data.map[y][x].startsWith('enemy-'))
+    },
+    isEnemyStop (x, y) {
+      return (this.data.map[y][x] === 'enemy-stop')
     },
     isEnemyDown (x, y) {
       return (this.data.map[y][x] === 'enemy-down')
