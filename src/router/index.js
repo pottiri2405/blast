@@ -2,6 +2,7 @@ import Vue from 'vue'
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue' // added
 import Router from 'vue-router'
 import blast from '@/components/blast' // added
+import combine from '@/components/combine' // added
 import Vue2TouchEvents from 'vue2-touch-events' // added
 import 'bootstrap/dist/css/bootstrap.css' // added
 import 'bootstrap-vue/dist/bootstrap-vue.css' // added
@@ -20,6 +21,11 @@ export default new Router({
       name: 'blast_with_language',
       component: blast
     },
+    {
+      path: '/combine/:id/:language',
+      name: 'combine',
+      component: combine
+    },    
     {
       path: '/blast/:id',
       name: 'blast',

@@ -101,6 +101,13 @@
   50% {transform: scale(0.75, 0.75);}
   100% {transform: scale(1.0, 1.0);}
 }
+.combine {
+  animation: combine-animation 0.5s forwards;
+}
+@keyframes combine-animation {
+  0% {transform: scale(1.0, 1.0);}
+  100% {transform: scale(3.0, 3.0);}
+}
 .knockout {
   animation: knockout-animation 1.0s forwards;
 }
